@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const Student = require("../models/student");
 const Faculty = require("../models/faculty");
 const Admin = require("../models/admin");
+const Project = require("../models/project");
 const auth = require("../middleware/auth");
 
 const router = express.Router();
@@ -211,4 +212,36 @@ router.get("/logout", auth, async (req, res) => {
   res.token = null;
   res.status(200).send({ message: "Logged out successfully" });
 });
+
+//route GET api/users/all_users
+//desc get all users
+//access Public
+router.get("/all_users", async (req, res) => {
+  try {
+    const students = await Student.find();
+    const faculties = await Faculty.find();
+    const admins = await Admin.find();
+    const data = {
+      students,
+      faculties,
+      admins,
+    };
+    res.status(200).send(data);
+  } catch (e) {
+    res.status(400).send("Error in getting users" + e.message);
+  }
+});
+
+//route GET api/users/all_projects
+//desc get all projects
+//access Public
+router.get("/all_projects", async (req, res) => {
+  try {
+    const projects = await Project.find();
+    res.status(200).send(projects);
+  } catch (e) {
+    res.status(400).send("Error in getting projects" + e.message);
+  }
+});
+
 module.exports = router;
