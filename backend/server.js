@@ -26,10 +26,10 @@ mongoose
 
 // Routes
 app.use("/api/users", require("./routes/userRoutes"));
-// app.use("/api/projects", require("./routes/projectRoutes"));
+app.use("/api/projects", require("./routes/projectRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
-// app.use("/api/faculty", require("./routes/facultyRoutes"));
-// app.use("/api/student", require("./routes/studentRoutes"));
+app.use("/api/faculty", require("./routes/facultyRoutes"));
+app.use("/api/student", require("./routes/studentRoutes"));
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);

@@ -20,13 +20,19 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    let user;
+    let user,
+      message = null;
 
     user = await Student.findOne({ email });
     if (user) {
       if (user.password == process.env.DEFAULT_PASSWORD) {
         if (password != process.env.DEFAULT_PASSWORD) {
           return res.status(401).send({ error: "Invalid login credentials" });
+        } else {
+          return res.status(200).send({
+            message:
+              "Please change your password by calling /api/users/change-password",
+          });
         }
       }
       //   console.log("student found");
@@ -37,6 +43,15 @@ router.post("/login", async (req, res) => {
         if (user.password == process.env.DEFAULT_PASSWORD) {
           if (password != process.env.DEFAULT_PASSWORD) {
             return res.status(401).send({ error: "Invalid login credentials" });
+          } else {
+            return res.status(200).send({
+              userId: user._id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+              message:
+                "Please change your password by calling /api/users/change-password",
+            });
           }
         }
         // console.log("faculty found");
@@ -71,6 +86,8 @@ router.post("/login", async (req, res) => {
     user.token = token;
     //remove password from user data
     delete user.password;
+    //set token in header 
+    res.header("x-auth-token", token);
     res.status(200).json(user);
   } catch (e) {
     res.status(400).send("Error in Logging in" + e.message);

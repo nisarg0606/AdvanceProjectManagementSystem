@@ -1,5 +1,30 @@
 const mongoose = require("mongoose");
 
+const CommentSchema = new mongoose.Schema({
+  text: {
+    type: String,
+    // required: true,
+  },
+  name: {
+    type: String,
+    // required: true,
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    refPath: "onModel",
+    // required: true,
+  },
+  onModel: {
+    type: String,
+    enum: ["Faculty", "Student"],
+    // required: true,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const ProjectSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -28,7 +53,7 @@ const ProjectSchema = new mongoose.Schema({
   ],
   status: {
     type: String,
-    enum: ["active", "inactive", "completed"],
+    enum: ["active", "inactive", "completed", "rejected"],
     default: "active",
   },
   invite_code: {
@@ -38,19 +63,7 @@ const ProjectSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  comments: [
-    {
-      content: {
-        type: String,
-        // required: true,
-      },
-      author: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: ["Student", "Faculty"],
-        // required: true,
-      },
-    },
-  ],
+  comments: [CommentSchema],
   capacity: {
     type: Number,
     default: 4,
@@ -66,6 +79,26 @@ const ProjectSchema = new mongoose.Schema({
   presentation_link: {
     type: String,
     default: "",
+  },
+  project_type: {
+    type: String,
+    enum: ["IDP (Industry Defined Project)", "UDP (User Defined Project)"],
+    default: "UDP (User Defined Project)",
+  },
+  company: {
+    type: String,
+  },
+  company_email: {
+    type: String,
+  },
+  frontendTechnologies: {
+    type: String,
+  },
+  backendTechnologies: {
+    type: String,
+  },
+  databaseTechnologies: {
+    type: String,
   },
 });
 

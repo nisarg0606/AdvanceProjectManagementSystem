@@ -48,12 +48,6 @@ const FacultySchema = new mongoose.Schema({
   phoneNumber: {
     type: Number,
     required: true,
-    validate: {
-      validator: function (v) {
-        return /^\d{10}$/.test(v);
-      },
-      message: (props) => `${props.value} is not a valid phone number!`,
-    },
   },
   department: {
     type: String,
@@ -66,11 +60,21 @@ const FacultySchema = new mongoose.Schema({
     required: true,
   },
   //maxiumum faculty members can take max projects
-    maxProjects: {
+  maxProjects: {
     type: Number,
     default: 10,
     required: true,
+  },
+  projects: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
     },
+  ],
+  projectCount: {
+    type: Number,
+    default: 0,
+  },
 });
 
 module.exports = mongoose.model("Faculty", FacultySchema);

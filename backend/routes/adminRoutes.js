@@ -87,7 +87,7 @@ router.post("/add-faculties", auth, upload.single("file"), async (req, res) => {
     const faculties = await csvtojson({
       // ignore first row
       ignoreEmpty: true,
-      ignoreColumns: /(name,email, department)/,
+      ignoreColumns: /(name, email, department, phoneNumber)/,
     }).fromString(req.file.buffer.toString());
 
     // Create an array of user objects with the default password and the passwordChanged flag set to false
@@ -97,6 +97,7 @@ router.post("/add-faculties", auth, upload.single("file"), async (req, res) => {
         email: faculty.email,
         name: faculty.name,
         department: faculty.department,
+        phoneNumber: faculty.phoneNumber,
         role: "faculty",
         password: process.env.DEFAULT_PASSWORD,
         passwordChanged: false,
@@ -377,5 +378,24 @@ router.get("/reset-faculty-password/:id", auth, async (req, res) => {
     }
 });
 
-
+//get all users on the dashboard
+// @route   GET api/admin/dashboard
+// @desc    Get all users, admins, students and faculties
+// @access  Private
+router.get("/dashboard", auth, async (req, res) => {
+    try {
+        if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
+        const admins = await Admin.find();
+        const students = await Student.find();
+        const faculties = await Faculty.find();
+        const dashboard = {};
+        dashboard.admins = admins;
+        dashboard.students = students;
+        dashboard.faculties = faculties;
+        res.status(200).json(dashboard);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+    }
+});
 module.exports = router;
