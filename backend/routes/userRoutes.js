@@ -1,8 +1,10 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const Student = require("../models/student");
 const Faculty = require("../models/faculty");
 const Admin = require("../models/admin");
+const auth = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -11,59 +13,185 @@ const models = {
   faculty: Faculty,
   admin: Admin,
 };
-
+//@route POST api/users/login
+//@desc Login user
+//@access Public
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    let user, role;
+    let user;
 
     user = await Student.findOne({ email });
     if (user) {
-      role = "student";
+      if (user.password == process.env.DEFAULT_PASSWORD) {
+        if (password != process.env.DEFAULT_PASSWORD) {
+          return res.status(401).send({ error: "Invalid login credentials" });
+        }
+      }
+      //   console.log("student found");
+      console.log(user);
     } else {
       user = await Faculty.findOne({ email });
       if (user) {
-        role = "faculty";
+        if (user.password == process.env.DEFAULT_PASSWORD) {
+          if (password != process.env.DEFAULT_PASSWORD) {
+            return res.status(401).send({ error: "Invalid login credentials" });
+          }
+        }
+        // console.log("faculty found");
+        console.log(user);
       } else {
         user = await Admin.findOne({ email });
         if (user) {
-          role = "admin";
+          //   console.log("admin found");
+          console.log(user);
         }
       }
     }
 
-    if (!user) {
-      return res.status(401).send({ error: "Invalid login credentials" });
-    }
+    if (!user) return res.status(401).send({ error: "you are not registered" });
+    const isMatch = await bcrypt.compare(password, user.password);
 
-    const isMatch = await user.comparePassword(password);
+    if (!isMatch) return res.status(401).send({ error: "Invalid password}" });
 
-    if (!isMatch) {
-      return res.status(401).send({ error: "Invalid login credentials" });
-    }
+    // add token to user data
 
+    // remove password from user data
+    delete user.password;
     const token = jwt.sign(
-      { _id: user._id, role: role },
+      {
+        userId: user._id,
+        role: user.role,
+      },
       process.env.JWT_SECRET
     );
-    res.send({ user, token });
+    // console.log(token);
+    user = user.toObject();
+    user.token = token;
+    //remove password from user data
+    delete user.password;
+    res.status(200).json(user);
   } catch (e) {
-    res.status(400).send(e);
+    res.status(400).send("Error in Logging in" + e.message);
   }
 });
 
-//signup route only for admin
+//@route POST api/users/signup (only for admin)
+//@desc Register admin
+//@access Public
 router.post("/signup", async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = new Admin({ email, password });
+    const { name, email, password } = req.body;
+
+    //check if user already exists
+    const exists = await Admin.findOne({ email });
+    if (exists) {
+      return res.status(400).send({ error: "User already exists" });
+    }
+
+    // encrypt password
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    //create new user
+    const user = new Admin({ name, email, password: hashedPassword });
     await user.save();
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-    res.status(201).send({ user, token });
+    res.status(201).send({ user });
   } catch (e) {
     console.log(e);
   }
 });
 
+//@route POST api/users/change-password
+//@desc Change password
+//@access Public
+router.post("/change-password", async (req, res) => {
+  try {
+    const { email, password, newPassword } = req.body;
+    let user;
+    user = await Student.findOne({ email });
+    if (user) {
+      if (user.password == process.env.DEFAULT_PASSWORD) {
+        if (password != process.env.DEFAULT_PASSWORD) {
+          return res.status(401).send({ error: "Invalid login credentials" });
+        } else {
+          const salt = await bcrypt.genSalt(12);
+          const hashedPassword = await bcrypt.hash(newPassword, salt);
+          user.password = hashedPassword;
+          user.passwordChanged = true;
+          await user.save();
+          return res
+            .status(200)
+            .send({ message: "Password changed successfully" });
+        }
+      } else {
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch)
+          return res.status(401).send({ error: "Invalid password}" });
+        const salt = await bcrypt.genSalt(12);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        user.password = hashedPassword;
+        user.passwordChanged = true;
+        await user.save();
+        return res
+          .status(200)
+          .send({ message: "Password changed successfully" });
+      }
+    } else {
+      user = await Faculty.findOne({ email });
+      if (user) {
+        if (user.password == process.env.DEFAULT_PASSWORD) {
+          if (password != process.env.DEFAULT_PASSWORD) {
+            return res.status(401).send({ error: "Invalid login credentials" });
+          } else {
+            const salt = await bcrypt.genSalt(12);
+            const hashedPassword = await bcrypt.hash(newPassword, salt);
+            user.password = hashedPassword;
+            user.passwordChanged = true;
+            await user.save();
+            return res
+              .status(200)
+              .send({ message: "Password changed successfully" });
+          }
+        } else {
+          const isMatch = await bcrypt.compare(password, user.password);
+          if (!isMatch)
+            return res.status(401).send({ error: "Invalid password}" });
+          const salt = await bcrypt.genSalt(12);
+          const hashedPassword = await bcrypt.hash(newPassword, salt);
+          user.password = hashedPassword;
+          user.passwordChanged = true;
+          await user.save();
+          return res
+            .status(200)
+            .send({ message: "Password changed successfully" });
+        }
+      } else {
+        user = await Admin.findOne({ email });
+        if (!user)
+          return res.status(401).send({ error: "you are not registered" });
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch)
+          return res.status(401).send({ error: "Invalid password}" });
+        const salt = await bcrypt.genSalt(12);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        user.password = hashedPassword;
+        await user.save();
+        res.status(200).send({ message: "Password changed successfully" });
+      }
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(400).send("Error in Changing Password " + e.message);
+  }
+});
+
+//route GET api/users/logout
+//desc logout user
+//access Private
+router.get("/logout", auth, async (req, res) => {
+  res.token = null;
+  res.status(200).send({ message: "Logged out successfully" });
+});
 module.exports = router;

@@ -16,12 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Connect to MongoDB
 mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-  })
+  .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("MongoDB connected");
   })
@@ -31,10 +26,10 @@ mongoose
 
 // Routes
 app.use("/api/users", require("./routes/userRoutes"));
-app.use("/api/projects", require("./routes/projectRoutes"));
+// app.use("/api/projects", require("./routes/projectRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
-app.use("/api/faculty", require("./routes/facultyRoutes"));
-app.use("/api/student", require("./routes/studentRoutes"));
+// app.use("/api/faculty", require("./routes/facultyRoutes"));
+// app.use("/api/student", require("./routes/studentRoutes"));
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);

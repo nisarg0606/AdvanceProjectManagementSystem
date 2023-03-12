@@ -12,9 +12,13 @@ const models = {
 const auth = async (req, res, next) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (!token) {
+      console.log("No token found");
+      throw new Error();
+    }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await models[decoded.role].findOne({ _id: decoded._id });
+    const user = await models[decoded.role].findOne({ _id: decoded.userId });
     if (!user) {
       console.log("User not found");
       throw new Error();
@@ -24,7 +28,7 @@ const auth = async (req, res, next) => {
     req.token = token;
     next();
   } catch (e) {
-    res.status(401).send({ error: "Please authenticate." });
+    res.status(401).send({ error: "Please authenticate. ---> " + e.message });
   }
 };
 
