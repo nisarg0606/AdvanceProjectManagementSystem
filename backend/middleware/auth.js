@@ -2,11 +2,13 @@ const jwt = require("jsonwebtoken");
 const Student = require("../models/student");
 const Faculty = require("../models/faculty");
 const Admin = require("../models/admin");
+const BlacklistedToken = require("../models/blacklistedToken");
 
 const models = {
   student: Student,
   faculty: Faculty,
   admin: Admin,
+  blacklistedToken: BlacklistedToken,
 };
 
 const auth = async (req, res, next) => {
@@ -24,6 +26,13 @@ const auth = async (req, res, next) => {
       throw new Error();
     }
 
+    const blacklistedToken = await models.blacklistedToken.findOne({
+      token: token,
+    });
+    if (blacklistedToken) {
+      console.log("Token blacklisted");
+      throw new Error();
+    }
     req.user = user;
     req.token = token;
     next();

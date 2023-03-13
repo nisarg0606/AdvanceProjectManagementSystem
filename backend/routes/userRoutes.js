@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const Student = require("../models/student");
 const Faculty = require("../models/faculty");
 const Admin = require("../models/admin");
+const BlacklistedToken = require("../models/blacklistedToken");
 const Project = require("../models/project");
 const auth = require("../middleware/auth");
 
@@ -210,6 +211,9 @@ router.post("/change-password", async (req, res) => {
 //access Private
 router.get("/logout", auth, async (req, res) => {
   res.token = null;
+  //add token to blacklist
+  const blacklistedToken = new BlacklistedToken({ token: req.token, expires: req.tokenExpires });
+  await blacklistedToken.save();
   res.status(200).send({ message: "Logged out successfully" });
 });
 
