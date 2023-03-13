@@ -130,7 +130,21 @@ router.post("/add-faculties", auth, upload.single("file"), async (req, res) => {
         passwordChanged: false,
       };
     });
-
+    //if csv contains duplicate emails
+    const emails = userObjects.map((user) => user.email);
+    const duplicateEmails = emails.filter(
+        (email, index) => emails.indexOf(email) !== index
+    );
+    if (duplicateEmails.length > 0) {
+        return res.status(400).send("Duplicate emails");
+    }
+    //check if any of the faculties already exist
+    const existingFaculties = await Faculty.find({
+        email: { $in: userObjects.map((user) => user.email) },
+    });
+    if (existingFaculties.length > 0) {
+        return res.status(400).send("Some faculties already exist");
+    }
     const result = await Faculty.insertMany(userObjects);
 
     res.status(201).json(result);
