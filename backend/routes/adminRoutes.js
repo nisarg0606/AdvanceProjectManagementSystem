@@ -193,11 +193,12 @@ router.post("/add-student", auth, async (req, res) => {
 router.post("/add-faculty", auth, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
-        const { email, name, department } = req.body;
+        const { email, name, department, phoneNumber } = req.body;
         const faculty = new Faculty({
             email,
             name,
             department,
+            phoneNumber,
             role: "faculty",
             password: process.env.DEFAULT_PASSWORD,
             passwordChanged: false,
