@@ -100,16 +100,24 @@ router.get("/requests", auth, async (req, res) => {
       const description = projects[i].description;
       // get leader name
       const leaderName = await Student.findById(projects[i].leader).select(
-        "name"
+        "name email"
       );
       // get leader email
-      const leaderEmail = await Student.findById(projects[i].leader).select(
-        "email"
-      );
+      const leaderEmail = leaderName.email;
       // get student array
       const students = projects[i].students;
       // get student names
       const studentsData = [];
+      //project type
+      const projectType = projects[i].projectType;
+      //frontendtechnologies
+      const frontendTechnologies = projects[i].frontendTechnologies;
+      //backendtechnologies
+      const backendTechnologies = projects[i].backendTechnologies;
+      //database
+      const database = projects[i].database;
+      //invite-code
+      const inviteCode = projects[i].invite_code;
       for (let j = 0; j < students.length; j++) {
         const student = await Student.findById(students[j]).select("name _id");
         // create json when id is key and name is value
@@ -122,9 +130,14 @@ router.get("/requests", auth, async (req, res) => {
         project: title,
         description: description,
         leaderName: leaderName.name,
-        leaderEmail: leaderEmail.email,
+        leaderEmail: leaderEmail,
         //return id and name of each student
         students: studentsData,
+        projectType: projectType,
+        frontendTechnologies: frontendTechnologies,
+        backendTechnologies: backendTechnologies,
+        database: database,
+        inviteCode: inviteCode,
       });
     }
     res.status(200).json(requests);
@@ -169,4 +182,32 @@ router.get("/dashboard", auth, async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
+
+//get group names under a faculty
+//@route GET api/faculty/groups
+//@desc Get Students groups under a faculty
+//@access Private
+router.get("/groups", auth, async (req, res) => {
+  try {
+    // if role is not faculty then return error
+    if (req.user.role !== "faculty") {
+      return res.status(401).json({ msg: "Not authorized" });
+    }
+    const faculty = await Faculty.findById(req.user._id).select("-password");
+    if (!faculty) {
+      return res.status(404).json({ msg: "Faculty not found" });
+    }
+    let groups = await Project.find({
+      faculty: req.user._id,
+      isApproved: true,
+    });
+    //send groups
+    console.log(groups);
+    res.status(200).json(groups);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
 module.exports = router;

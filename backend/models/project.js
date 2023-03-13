@@ -29,6 +29,7 @@ const ProjectSchema = new mongoose.Schema({
   groupName: {
     type: String,
     required: true,
+    unique: true,
     default: "Group Name" + Math.floor(Math.random() * 1000),
   },
   semester: {
@@ -98,18 +99,23 @@ const ProjectSchema = new mongoose.Schema({
   },
   company: {
     type: String,
+    default: "vsitr",
   },
   company_email: {
     type: String,
+    default: "vsitr@gmail.com",
   },
   frontendTechnologies: {
     type: String,
+    default: "HTML, CSS, JavaScript",
   },
   backendTechnologies: {
     type: String,
+    default: "Node.js, Express.js, MongoDB",
   },
-  databaseTechnologies: {
+  database: {
     type: String,
+    default: "MongoDB",
   },
 });
 

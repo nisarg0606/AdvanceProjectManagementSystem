@@ -246,7 +246,7 @@ router.post("/join", auth, async (req, res) => {
     if (req.user.project_id) {
       return res.status(401).json({ msg: "You already have a project" });
     }
-    const project = await Project.findOne({ invite_code });
+    const project = await Project.findOne({ invite_code: invite_code });
     if (!project) {
       return res.status(404).json({ msg: "Invite code is invalid" });
     }

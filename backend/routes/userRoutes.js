@@ -27,25 +27,19 @@ router.post("/login", async (req, res) => {
 
     user = await Student.findOne({ email });
     if (user) {
-      if (user.password == process.env.DEFAULT_PASSWORD) {
-        if (password != process.env.DEFAULT_PASSWORD) {
-          return res.status(401).send({ error: "Invalid login credentials" });
-        } else {
+      if (user.password == password) {
           return res.status(200).send({
             message:
               "Please change your password by calling /api/users/change-password",
           });
         }
+        console.log(user);
+        //   console.log("student found");
       }
-      //   console.log("student found");
-      console.log(user);
-    } else {
+     else {
       user = await Faculty.findOne({ email });
       if (user) {
-        if (user.password == process.env.DEFAULT_PASSWORD) {
-          if (password != process.env.DEFAULT_PASSWORD) {
-            return res.status(401).send({ error: "Invalid login credentials" });
-          } else {
+        if (user.password == password) {
             return res.status(200).send({
               userId: user._id,
               email: user.email,
@@ -55,7 +49,6 @@ router.post("/login", async (req, res) => {
                 "Please change your password by calling /api/users/change-password",
             });
           }
-        }
         // console.log("faculty found");
         console.log(user);
       } else {
@@ -131,10 +124,7 @@ router.post("/change-password", async (req, res) => {
     let user;
     user = await Student.findOne({ email });
     if (user) {
-      if (user.password == process.env.DEFAULT_PASSWORD) {
-        if (password != process.env.DEFAULT_PASSWORD) {
-          return res.status(401).send({ error: "Invalid login credentials" });
-        } else {
+      if (user.password == password) {
           const salt = await bcrypt.genSalt(12);
           const hashedPassword = await bcrypt.hash(newPassword, salt);
           user.password = hashedPassword;
@@ -143,7 +133,6 @@ router.post("/change-password", async (req, res) => {
           return res
             .status(200)
             .send({ message: "Password changed successfully" });
-        }
       } else {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch)
@@ -160,10 +149,7 @@ router.post("/change-password", async (req, res) => {
     } else {
       user = await Faculty.findOne({ email });
       if (user) {
-        if (user.password == process.env.DEFAULT_PASSWORD) {
-          if (password != process.env.DEFAULT_PASSWORD) {
-            return res.status(401).send({ error: "Invalid login credentials" });
-          } else {
+        if (user.password == password) {
             const salt = await bcrypt.genSalt(12);
             const hashedPassword = await bcrypt.hash(newPassword, salt);
             user.password = hashedPassword;
@@ -172,7 +158,6 @@ router.post("/change-password", async (req, res) => {
             return res
               .status(200)
               .send({ message: "Password changed successfully" });
-          }
         } else {
           const isMatch = await bcrypt.compare(password, user.password);
           if (!isMatch)
