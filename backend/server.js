@@ -6,7 +6,7 @@ const path = require("path");
 
 const app = express();
 
-dotenv.config();
+dotenv.config({ path: "../.env" }); 
 
 const PORT = process.env.PORT || 5000;
 
