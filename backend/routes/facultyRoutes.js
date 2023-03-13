@@ -93,8 +93,9 @@ router.get("/requests", auth, async (req, res) => {
     for (let i = 0; i < projects.length; i++) {
       //get project id
       const projectId = projects[i]._id;
+      console.log(projectId);
       // get project title
-      const title = projects[0].title;
+      const title = projects[i].title;
       // get project description
       const description = projects[i].description;
       // get leader name
@@ -115,6 +116,7 @@ router.get("/requests", auth, async (req, res) => {
       }
       //add all to requests array
       requests.push({
+        projectId: projectId,
         project: title,
         description: description,
         leaderName: leaderName.name,
