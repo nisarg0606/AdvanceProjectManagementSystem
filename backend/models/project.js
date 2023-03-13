@@ -26,6 +26,17 @@ const CommentSchema = new mongoose.Schema({
 });
 
 const ProjectSchema = new mongoose.Schema({
+  groupName: {
+    type: String,
+    required: true,
+    default: "Group Name" + Math.floor(Math.random() * 1000),
+  },
+  semester: {
+    type: String,
+    required: true,
+    //sem 6, 7 or 8
+    default: "Semester" + Math.floor(Math.random() * 3 + 6),
+  },
   title: {
     type: String,
     required: true,
