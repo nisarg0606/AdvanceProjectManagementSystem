@@ -216,9 +216,9 @@ router.post("/add-faculty", auth, async (req, res) => {
 router.delete("/delete-student/:id", auth, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
-        const student = await Student.findById(req.params.id);
+        let student = await Student.findById(req.params.id);
         if (!student) return res.status(404).json({ message: "Student not found" });
-        await student.remove();
+        student = student.deleteOne({ _id: req.params.id});
         res.status(200).json({ message: "Student removed" });
     } catch (error) {
         console.error(error);
@@ -232,9 +232,9 @@ router.delete("/delete-student/:id", auth, async (req, res) => {
 router.delete("/delete-faculty/:id", auth, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
-        const faculty = await Faculty.findById(req.params.id);
+        let faculty = await Faculty.findById(req.params.id);
         if (!faculty) return res.status(404).json({ message: "Faculty not found" });
-        await faculty.remove();
+        faculty = faculty.deleteOne({ _id: req.params.id});
         res.status(200).json({ message: "Faculty removed" });
     } catch (error) {
         console.error(error);
