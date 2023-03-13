@@ -91,6 +91,8 @@ router.get("/requests", auth, async (req, res) => {
       isApproved: false,
     });
     for (let i = 0; i < projects.length; i++) {
+      //get project id
+      const projectId = projects[i]._id;
       // get project title
       const title = projects[0].title;
       // get project description
