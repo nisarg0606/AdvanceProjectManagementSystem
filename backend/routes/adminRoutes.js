@@ -197,10 +197,10 @@ router.delete("/remove-faculty/:id", auth, async (req, res) => {
     }
 });
 
-// @route   GET api/admin/get-students
+// @route   GET api/admin/students
 // @desc    Get all students
 // @access  Private
-router.get("/get-students", auth, async (req, res) => {
+router.get("/students", auth, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
         const students = await Student.find();
@@ -211,10 +211,10 @@ router.get("/get-students", auth, async (req, res) => {
     }
 });
 
-// @route   GET api/admin/get-faculties
+// @route   GET api/admin/faculties
 // @desc    Get all faculties
 // @access  Private
-router.get("/get-faculties", auth, async (req, res) => {
+router.get("/faculties", auth, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
         const faculties = await Faculty.find();
