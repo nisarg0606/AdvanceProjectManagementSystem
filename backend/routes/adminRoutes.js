@@ -63,6 +63,22 @@ router.post("/add-students", auth, upload.single("file"), async (req, res) => {
         passwordChanged: false,
       };
     });
+    //if csv contains duplicate enrollment numbers or emails
+    const enrollmentNumbers = userObjects.map((user) => user.enrollment_number);
+    const emails = userObjects.map((user) => user.email);
+    const duplicateEnrollmentNumbers = enrollmentNumbers.filter(
+        (enrollmentNumber, index) =>
+            enrollmentNumbers.indexOf(enrollmentNumber) !== index
+    );
+    const duplicateEmails = emails.filter(
+        (email, index) => emails.indexOf(email) !== index
+    );
+    if (duplicateEnrollmentNumbers.length > 0) {
+        return res.status(400).send("Duplicate enrollment numbers");
+    }
+    if (duplicateEmails.length > 0) {
+        return res.status(400).send("Duplicate emails");
+    }
     //check if any of the students already exist
     const existingStudents = await Student.find({
         email: { $in: userObjects.map((user) => user.email) },
@@ -73,7 +89,7 @@ router.post("/add-students", auth, upload.single("file"), async (req, res) => {
     if (existingStudents.length > 0) {
         return res.status(400).send("Some students already exist");
     }
-    
+
     const result = await Student.insertMany(userObjects);
     res.status(201).send(result);
   } catch (err) {
