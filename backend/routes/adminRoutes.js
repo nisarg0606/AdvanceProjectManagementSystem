@@ -63,6 +63,17 @@ router.post("/add-students", auth, upload.single("file"), async (req, res) => {
         passwordChanged: false,
       };
     });
+    //check if any of the students already exist
+    const existingStudents = await Student.find({
+        email: { $in: userObjects.map((user) => user.email) },
+        enrollment_number: {
+            $in: userObjects.map((user) => user.enrollment_number),
+        },
+    });
+    if (existingStudents.length > 0) {
+        return res.status(400).send("Some students already exist");
+    }
+    
     const result = await Student.insertMany(userObjects);
     res.status(201).send(result);
   } catch (err) {
