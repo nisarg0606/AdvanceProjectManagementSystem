@@ -19,6 +19,11 @@ router.get("/dashboard", auth, async (req, res) => {
     if (!project) {
       return res.status(404).json({ msg: "Projects not found" });
     }
+    if(project.status === "rejected" && project.isApproved === false){
+        const comments = project.comments;
+        const message = "Please delete this project by clicking the delete button here and create a new one";
+        return res.status(205).json({message,comments});
+    }
     // get leader name and email
     const leader = await Student.findOne({ _id: leaderId }).select( "name email");
     const leaderName = leader.name;
@@ -34,7 +39,7 @@ router.get("/dashboard", auth, async (req, res) => {
     const projectDescription = project.description;
     const project_type = project.project_type;
     const project_company = project.company;
-    const project_status = project.project_status;
+    const project_status = project.status;
     const project_comments = project.comments;
     const project_isApproved = project.isApproved;
     // get faculty name, email and phone number

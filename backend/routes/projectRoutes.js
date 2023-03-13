@@ -9,12 +9,43 @@ const Faculty = require("../models/faculty");
 const Student = require("../models/student");
 
 // @route   GET api/projects
-// @desc    Get all projects
+// @desc    Get project of logged in user
 // @access  Private
 router.get("/", auth, async (req, res) => {
   try {
-    const projects = await Project.find({}).populate("student");
-    res.status(200).json(projects);
+    if (req.user.role !== "student" && req.user.role !== "faculty") {
+      return res.status(401).json({ msg: "Not authorized" });
+    }
+    console.log(req.user.project_id);
+    console.log(req.user.isLeader);
+    let project = await Project.findById(req.user.project_id);
+    // get object of project
+    project = project.toObject();
+    //get name of leader
+    const leader = await Student.findById(project.leader);
+    project.leader = leader.name;
+    //get name of faculty
+    const faculty = await Faculty.findById(project.faculty);
+    project.faculty = faculty.name;
+    //get name of students
+    const students = await Student.find({ _id: { $in: project.students } });
+    project.students = students.map((student) => student.name);
+    if (req.user.isLeader) {
+      res.status(200).json(project);
+    } else {
+      res.status(200).json({
+        title: project.title,
+        description: project.description,
+        faculty: project.faculty,
+        students: project.students,
+        status: project.status,
+        isApproved: project.isApproved,
+        comments: project.comments,
+        report_link: project.report_link,
+        presentation_link: project.presentation_link,
+        repository_link: project.repository_link,
+      });
+    }
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -345,7 +376,7 @@ router.post("/approve/:id", auth, async (req, res) => {
     if (facultyId !== loggedUser) {
       return res.status(401).json({ msg: "Not authorized from tostring if ?" });
     }
-      // return res.status(401).json({ msg: "Not authorized from tostring if" });
+    // return res.status(401).json({ msg: "Not authorized from tostring if" });
     // }
     //can only approve project if project has a title
     if (!project.title) {
@@ -533,6 +564,20 @@ router.get("/:id/comments", auth, async (req, res) => {
     if (err.kind === "ObjectId") {
       return res.status(404).json({ msg: "Project not found" });
     }
+    res.status(500).send("Server Error --> " + err.message);
+  }
+});
+
+
+// @route   GET api/projects/all
+// @desc    Get all projects
+// @access  Private
+router.get("/all", auth, async (req, res) => {
+  try {
+    const projects = await Project.find().sort({ date: -1 });
+    res.status(200).json(projects);
+  } catch (err) {
+    console.error(err.message);
     res.status(500).send("Server Error --> " + err.message);
   }
 });
