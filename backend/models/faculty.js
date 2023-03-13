@@ -4,12 +4,6 @@ const FacultySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    validate: {
-      validator: function (v) {
-        return /^[a-zA-Z ]+$/.test(v);
-      },
-      message: (props) => `${props.value} is not a valid name!`,
-    },
   },
   email: {
     type: String,
@@ -46,7 +40,7 @@ const FacultySchema = new mongoose.Schema({
   },
   // phone should contain 10 digits
   phoneNumber: {
-    type: Number,
+    type: String,
     required: true,
   },
   department: {
