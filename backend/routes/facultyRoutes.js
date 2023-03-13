@@ -109,10 +109,12 @@ router.get("/requests", auth, async (req, res) => {
       // get student array
       const students = projects[i].students;
       // get student names
-      const studentNames = [];
+      const studentsData = [];
       for (let j = 0; j < students.length; j++) {
-        const studentName = await Student.findById(students[j]).select("name");
-        studentNames.push(studentName.name);
+        const student = await Student.findById(students[j]).select("name _id");
+        // create json when id is key and name is value
+        studentsData.push({ id: student._id, name: student.name });
+        // studentsData.push(student._id);
       }
       //add all to requests array
       requests.push({
@@ -121,7 +123,8 @@ router.get("/requests", auth, async (req, res) => {
         description: description,
         leaderName: leaderName.name,
         leaderEmail: leaderEmail.email,
-        students: studentNames,
+        //return id and name of each student
+        students: studentsData,
       });
     }
     res.status(200).json(requests);
