@@ -24,6 +24,7 @@ const Admin = require("../models/admin");
 // @access  Private
 router.get("/", auth, async (req, res) => {
   try {
+    if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
     const students = await Student.find();
     const faculties = await Faculty.find();
     const admins = await Admin.find();

@@ -19,7 +19,11 @@ const auth = async (req, res, next) => {
       throw new Error();
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+    //if token expired
+    if (decoded.exp < Date.now() / 1000) {
+      console.log("Token expired");
+      throw new Error();
+    }
     const user = await models[decoded.role].findOne({ _id: decoded.userId });
     if (!user) {
       console.log("User not found");
