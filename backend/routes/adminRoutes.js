@@ -210,10 +210,10 @@ router.post("/add-faculty", auth, async (req, res) => {
     }
 });
 
-// @route   DELETE api/admin/remove-student/:id
-// @desc    Remove student
+// @route   DELETE api/admin/delete-student/:id
+// @desc    delete student
 // @access  Private
-router.delete("/remove-student/:id", auth, async (req, res) => {
+router.delete("/delete-student/:id", auth, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
         const student = await Student.findById(req.params.id);
@@ -226,10 +226,10 @@ router.delete("/remove-student/:id", auth, async (req, res) => {
     }
 });
 
-// @route   DELETE api/admin/remove-faculty/:id
+// @route   DELETE api/admin/delete-faculty/:id
 // @desc    Remove faculty
 // @access  Private
-router.delete("/remove-faculty/:id", auth, async (req, res) => {
+router.delete("/delete-faculty/:id", auth, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
         const faculty = await Faculty.findById(req.params.id);
