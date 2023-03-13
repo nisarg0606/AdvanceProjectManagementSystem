@@ -27,8 +27,12 @@ router.get("/", auth, async (req, res) => {
     const students = await Student.find();
     const faculties = await Faculty.find();
     const admins = await Admin.find();
-    const users = [...students, ...faculties, ...admins];
-    res.status(200).json(users);
+    const data = {
+      students,
+      faculties,
+      admins,
+    };
+    res.status(200).send(data);
   } catch (err) {
     console.error(err.message);
     res.status(500).send(err.message);
