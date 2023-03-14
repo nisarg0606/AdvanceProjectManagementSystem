@@ -222,13 +222,14 @@ router.get("/groups", auth, async (req, res) => {
       group.students = studentsjson;
       groupsData.push(group);
     }
-    //take group name as key and group data as value
-    const groupjson = {};
+    //take group name as key and group data as array
+    const groupsjson = {};
     for (let i = 0; i < groupsData.length; i++) {
-      groupjson[groupsData[i].groupName] = groupsData[i];
+      //set group name as key and group data as array
+      groupsjson["Group" + (i+1)] = groupsData[i];
     }
+    res.status(200).json(groupsjson);
 
-    return res.status(200).json(groupjson);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
