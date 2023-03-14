@@ -62,13 +62,13 @@ router.get("/:id", auth, async (req, res) => {
     }
     const project = await Project.findById(req.params.id).populate("student");
     if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found from :id api 65" });
     }
     res.status(200).json(project);
   } catch (err) {
     console.error(err.message);
     if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 71" });
     }
     res.status(500).send("Server Error");
   }
@@ -169,7 +169,7 @@ router.put("/:id", auth, async (req, res) => {
       { new: true },
       (err, project) => {
         if (err) {
-          return res.status(404).json({ msg: "Project not found" });
+          return res.status(404).json({ msg: "Project not found 172" });
         }
         res.status(200).json(project);
       }
@@ -196,7 +196,7 @@ router.delete("/:id", auth, async (req, res) => {
     }
     const project = await Project.findById(req.params.id);
     if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 199 " });
     }
     //can only delete project if project is not approved
     if (project.isApproved === true) {
@@ -225,7 +225,7 @@ router.delete("/:id", auth, async (req, res) => {
   } catch (err) {
     console.error(err.message);
     if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 228" });
     }
     res.status(500).send("Server Error --> " + err.message);
   }
@@ -286,7 +286,7 @@ router.get("/leave", auth, async (req, res) => {
     }
     const project = await Project.findById(req.user.project_id);
     if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 289" });
     }
     // Remove project from student
     const student = await Student.findById(req.user._id);
@@ -307,7 +307,7 @@ router.get("/leave", auth, async (req, res) => {
   } catch (err) {
     console.error(err.message);
     if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 310" });
     }
     res.status(500).send("Server Error --> " + err.message);
   }
@@ -326,7 +326,7 @@ router.get("/remove/:id", auth, async (req, res) => {
     }
     const project = await Project.findById(req.user.project_id);
     if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 329" });
     }
     // Remove project from student
     const student = await Student.findById(req.params.id);
@@ -347,7 +347,7 @@ router.get("/remove/:id", auth, async (req, res) => {
   } catch (err) {
     console.error(err.message);
     if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 350" });
     }
     res.status(500).send("Server Error --> " + err.message);
   }
@@ -364,7 +364,7 @@ router.post("/approve/:id", auth, async (req, res) => {
     }
     const project = await Project.findById(req.params.id);
     if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 367" });
     }
     //can only approve project if project is not approved
     if (project.isApproved === true) {
@@ -409,7 +409,7 @@ router.post("/approve/:id", auth, async (req, res) => {
   } catch (err) {
     console.error(err.message);
     if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 412" });
     }
     res.status(500).send("Server Error --> " + err.message);
   }
@@ -430,7 +430,7 @@ router.post("/reject/:id", auth, async (req, res) => {
     }
     const project = await Project.findById(req.params.id);
     if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 433" });
     }
     //can only reject project if project is not approved
     if (project.isApproved === true) {
@@ -464,7 +464,7 @@ router.post("/reject/:id", auth, async (req, res) => {
   } catch (err) {
     console.error(err.message);
     if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 467" });
     }
     res.status(500).send("Server Error --> " + err.message);
   }
@@ -481,7 +481,7 @@ router.post("/comment/:id", auth, async (req, res) => {
     }
     const project = await Project.findById(req.params.id);
     if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 484" });
     }
     //can only comment on project if project is approved
     if (project.isApproved === false) {
@@ -506,7 +506,7 @@ router.post("/comment/:id", auth, async (req, res) => {
   } catch (err) {
     console.error(err.message);
     if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 509" });
     }
     res.status(500).send("Server Error --> " + err.message);
   }
@@ -519,7 +519,7 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 522" });
     }
     // Pull out comment
     const comment = project.comments.find(
@@ -543,7 +543,7 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
   } catch (err) {
     console.error(err.message);
     if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 546" });
     }
     res.status(500).send("Server Error --> " + err.message);
   }
@@ -556,26 +556,45 @@ router.get("/:id/comments", auth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 559" });
     }
     res.status(200).json(project.comments);
   } catch (err) {
     console.error(err.message);
     if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Project not found" });
+      return res.status(404).json({ msg: "Project not found 565" });
     }
     res.status(500).send("Server Error --> " + err.message);
   }
 });
 
-
-// @route   GET api/projects/all
+// @route   GET api/projects/all/projects
 // @desc    Get all projects
 // @access  Private
-router.get("/all", auth, async (req, res) => {
+router.get("/all/projects", auth, async (req, res) => {
   try {
     const projects = await Project.find().sort({ date: -1 });
-    res.status(200).json(projects);
+    //get leader name, student name and faculty name
+    let data = {};
+    for (let i = 0; i < projects.length; i++) {
+      const leader = await Student.findById(projects[i].leader);
+      console.log(leader);
+      for (let j = 0; j < projects[i].students.length; j++) {
+        const student = await Student.findById(projects[i].students[j]);
+        let studentdata = {
+          id: student._id,
+          name: student.name,
+          email: student.email,
+        };
+        data[projects[i]._id] = {
+          project: projects[i],
+          leader: leader.name,
+          student: studentdata,
+        };
+      }
+    }
+    res.status(200).json(data);
+    // res.status(200).json(projects);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error --> " + err.message);

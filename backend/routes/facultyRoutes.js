@@ -109,7 +109,7 @@ router.get("/requests", auth, async (req, res) => {
       // get student names
       const studentsData = [];
       //project type
-      const projectType = projects[i].projectType;
+      const projectType = projects[i].project_type;
       //frontendtechnologies
       const frontendTechnologies = projects[i].frontendTechnologies;
       //backendtechnologies
@@ -201,9 +201,9 @@ router.get("/groups", auth, async (req, res) => {
       faculty: req.user._id,
       isApproved: true,
     });
-    //send groups
     console.log(groups);
-    res.status(200).json(groups);
+    // extract leader id, name, email. Students name id and email and add it to groups object
+    return res.status(200).json(groups);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");

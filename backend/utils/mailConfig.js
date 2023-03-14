@@ -11,6 +11,13 @@ const transporter = nodemailer.createTransport({
         pass: 'f64PQs5qj5ynrnBNez'
     }
 });
+// var transport = nodemailer.createTransport("SMTP", {
+//   service: "hotmail",
+//   auth: {
+//       user: "user@outlook.com",
+//       pass: "password"
+//   }
+// });
 
 const sendWelcomeEmailWithPasswordToStudent = async (email, name, password) => {
     try {
