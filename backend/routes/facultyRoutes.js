@@ -168,6 +168,7 @@ router.get("/dashboard", auth, async (req, res) => {
     const requests = await Project.find({
       faculty: req.user._id,
       isApproved: false,
+      status: "active",
     });
     dashboard.totalRequests = requests.length;
     // get total students from accepted projects
