@@ -93,7 +93,6 @@ router.get("/requests", auth, async (req, res) => {
     for (let i = 0; i < projects.length; i++) {
       //get project id
       const projectId = projects[i]._id;
-      console.log(projectId);
       // get project title
       const title = projects[i].title;
       // get project description
@@ -201,9 +200,33 @@ router.get("/groups", auth, async (req, res) => {
       faculty: req.user._id,
       isApproved: true,
     });
-    console.log(groups);
-    // extract leader id, name, email. Students name id and email and add it to groups object
-    return res.status(200).json(groups);
+    const groupsData = [];
+    for (let i = 0; i < groups.length; i++) {
+      let group = groups[i].toObject();
+      const leader = await Student.findById(group.leader).select("name email");
+      group.leader = { id: leader._id, name: leader.name, email: leader.email };
+      const students = [];
+      for (let j = 0; j < group.students.length; j++) {
+        const student = await Student.findById(group.students[j]).select(
+          "name email"
+        );
+        students.push({ id: student._id, name: student.name, email: student.email });
+      }
+      //use students id as key and name as value
+      const studentsjson = {};
+      for (let i = 0; i < students.length; i++) {
+        studentsjson[students[i].id] = students[i];
+      }
+      group.students = studentsjson;
+      groupsData.push(group);
+    }
+    //take group name as key and group data as value
+    const groupjson = {};
+    for (let i = 0; i < groupsData.length; i++) {
+      groupjson[groupsData[i].groupName] = groupsData[i];
+    }
+
+    return res.status(200).json(groupjson);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
