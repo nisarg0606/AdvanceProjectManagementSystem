@@ -89,6 +89,7 @@ router.get("/requests", auth, async (req, res) => {
     const projects = await Project.find({
       faculty: req.user._id,
       isApproved: false,
+      status: "active"
     });
     for (let i = 0; i < projects.length; i++) {
       //get project id
