@@ -30,7 +30,7 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    default: "Group Name" + Math.floor(Math.random() * 1000),
+    default: "Group" + Math.floor(Math.random() * 10000),
   },
   semester: {
     type: String,

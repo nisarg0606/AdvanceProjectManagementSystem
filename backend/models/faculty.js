@@ -63,6 +63,7 @@ const FacultySchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Project",
+      unique: true,
     },
   ],
   projectCount: {

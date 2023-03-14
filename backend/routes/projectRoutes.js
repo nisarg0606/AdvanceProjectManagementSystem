@@ -460,6 +460,13 @@ router.post("/reject/:id", auth, async (req, res) => {
       user: req.user._id,
     });
     await project.save();
+    //remove project from faculty
+    const faculty = await Faculty.findById(project.faculty);
+    faculty.projects = faculty.projects.filter(
+      (project) => project._id !== req.params.id
+    );
+    faculty.projectCount -= 1;
+    await faculty.save();
     res.status(200).json(project);
   } catch (err) {
     console.error(err.message);
@@ -479,21 +486,9 @@ router.post("/comment/:id", auth, async (req, res) => {
     if (!text) {
       return res.status(400).json({ msg: "Text is required" });
     }
-    const project = await Project.findById(req.params.id);
+    let project = await Project.findById(req.params.id);
     if (!project) {
       return res.status(404).json({ msg: "Project not found 484" });
-    }
-    //can only comment on project if project is approved
-    if (project.isApproved === false) {
-      return res.status(401).json({ msg: "Project is not approved" });
-    }
-    //can only comment on project if project has a title
-    if (!project.title) {
-      return res.status(401).json({ msg: "Project has no title" });
-    }
-    //can only comment on project if project has a description
-    if (!project.description) {
-      return res.status(401).json({ msg: "Project has no description" });
     }
     //add comment to project with user's name
     project.comments.push({
@@ -502,6 +497,7 @@ router.post("/comment/:id", auth, async (req, res) => {
       user: req.user._id,
     });
     await project.save();
+    project = await getProjectLeaderFacultyStudents(project);
     res.status(200).json(project);
   } catch (err) {
     console.error(err.message);
@@ -511,6 +507,21 @@ router.post("/comment/:id", auth, async (req, res) => {
     res.status(500).send("Server Error --> " + err.message);
   }
 });
+
+async function getProjectLeaderFacultyStudents(project) {
+  project = project.toObject();
+  let leader = await Student.findById(project.leader);
+  let faculty = await Faculty.findById(project.faculty);
+  let students = [];
+  for (let i = 0; i < project.students.length; i++) {
+    let student = await Student.findById(project.students[i]);
+    students.push(student);
+  }
+  project.leader = leader;
+  project.faculty = faculty;
+  project.students = students;
+  return project;
+}
 
 // @route   DELETE api/projects/comment/:id/:comment_id
 // @desc    Delete comment
@@ -530,7 +541,7 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
       return res.status(404).json({ msg: "Comment does not exist" });
     }
     // Check user
-    if (comment.user.toString() !== req.user._id) {
+    if (comment.user.toString() !== req.user._id.toString()) {
       return res.status(401).json({ msg: "User not authorized" });
     }
     // Get remove index
