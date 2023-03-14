@@ -92,9 +92,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
     const { title, description, faculty_id } = req.body;
-    if (faculty_id === undefined) {
-      faculty_id = null;
-    }
+    if(!faculty_id) return res.status(400).json({ msg: "Faculty is required" });
     try {
       if (req.user.role !== "student") {
         return res.status(401).json({ msg: "Not authorized" });
