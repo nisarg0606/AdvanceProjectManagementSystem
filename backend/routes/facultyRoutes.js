@@ -203,6 +203,8 @@ router.get("/groups", auth, async (req, res) => {
     const groupsData = [];
     for (let i = 0; i < groups.length; i++) {
       let group = groups[i].toObject();
+      //replace spaces in groupname with _
+      group.groupName = group.groupName.replace(/\s/g, "_");
       const leader = await Student.findById(group.leader).select("name email");
       group.leader = { id: leader._id, name: leader.name, email: leader.email };
       const students = [];
