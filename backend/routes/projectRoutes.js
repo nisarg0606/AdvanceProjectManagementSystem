@@ -144,12 +144,23 @@ const generateInviteCode = () => {
 // @desc    Update project
 // @access  Private
 router.put("/:id", auth, async (req, res) => {
-  const { title, description, faculty_id } = req.body;
+  const { title, description, status, repository_link, report_link, frontendTechnologies, backendTechnologies, database, presentation_link, groupName, company, company_email } = req.body;
   // Build project object
   const projectFields = {};
   if (title) projectFields.title = title;
   if (description) projectFields.description = description;
-  if (faculty_id) projectFields.faculty_id = faculty_id;
+  // if (faculty_id) projectFields.faculty_id = faculty_id;
+  if (status) projectFields.status = status;
+  // if (capacity) projectFields.capacity = capacity;
+  if (repository_link) projectFields.repository_link = repository_link;
+  if (report_link) projectFields.report_link = report_link;
+  if (frontendTechnologies) projectFields.frontendTechnologies = frontendTechnologies;
+  if (backendTechnologies) projectFields.backendTechnologies = backendTechnologies;
+  if (database) projectFields.database = database;
+  if (presentation_link) projectFields.presentation_link = presentation_link;
+  if (groupName) projectFields.groupName = groupName;
+  if (company) projectFields.company = company;
+  if (company_email) projectFields.company_email = company_email;
 
   try {
     if (req.user.role !== "student") {

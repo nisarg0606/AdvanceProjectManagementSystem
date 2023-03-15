@@ -25,13 +25,21 @@ router.get("/available", auth, async (req, res) => {
     const faculties = await Faculty.find({
       $expr: { $lt: ["$projectCount", "$maxProjects"] },
     }).select("name projectCount maxProjects");
-    const facultyNames = faculties.map((faculty) => {
-      return {
-        _id: faculty._id,
+    // set faculty id as key and name, remainingProjects as value
+    const facultyNames = {};
+    faculties.forEach((faculty) => {
+      facultyNames[faculty._id] = {
         name: faculty.name,
         remainingProjects: faculty.maxProjects - faculty.projectCount,
       };
     });
+    // const facultyNames = faculties.map((faculty) => {
+    //   return {
+    //     _id: faculty._id,
+    //     name: faculty.name,
+    //     remainingProjects: faculty.maxProjects - faculty.projectCount,
+    //   };
+    // });
     res.status(200).json(facultyNames);
   } catch (err) {
     console.error(err.message);

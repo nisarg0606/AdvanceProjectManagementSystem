@@ -9,7 +9,7 @@ const { count } = require("../models/student");
 const mongo = require("mongodb");
 
 const router = express.Router();
-// @route   GET api/students/dashboard
+// @route   GET api/student/dashboard
 // @desc    Get Faculty name, email,phone number, Group members, Group Leader and project title
 // @access  Private
 router.get("/dashboard", auth, async (req, res) => {
