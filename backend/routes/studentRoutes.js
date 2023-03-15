@@ -102,17 +102,17 @@ router.get("/group", auth, async (req, res) => {
         .json({ msg: "Group not found as you do not have any projects" });
     }
     const groupMembers = [];
-    const groupMemberData = {};
     for (let i = 0; i < project.students.length; i++) {
       const member = await Student.findById(project.students[i]);
-      // take id as key and name, email, enrollment number as value
+      // take member+loopvalue as key and name, email, enrollment number as value
       groupMembers.push({
-        [member._id]: {
+        ["member" + i + 1]: {
+          _id: member._id,
           name: member.name,
           email: member.email,
           enrollment_number: member.enrollment_number,
-        }
-      })
+        },
+      });
     }
     res.status(200).json(groupMembers);
   } catch (err) {
