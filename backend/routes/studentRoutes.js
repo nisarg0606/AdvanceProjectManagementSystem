@@ -112,10 +112,11 @@ router.get("/group", auth, async (req, res) => {
           name: member.name,
           email: member.email,
           enrollment_number: member.enrollment_number,
+          leaderEmail: leaderEmail.email,
         },
       });
     }
-    res.status(200).json({ leaderEmail, groupMembers });
+    res.status(200).json(groupMembers);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error --> " + err.message);
