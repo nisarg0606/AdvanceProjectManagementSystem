@@ -28,10 +28,20 @@ router.get("/dashboard", auth, async (req, res) => {
     const leader = await Student.findOne({ _id: leaderId }).select( "name email");
     const leaderName = leader.name;
     const leaderEmail = leader.email;
-    const groupMembers = [];
+    // get group members ket as id and value as name, enrollment number and email
+    let groupMembers = [];
+    let groupMemberData = {}; 
     for (let i = 0; i < project.students.length; i++) {
       const member = await Student.findById(project.students[i]);
-      groupMembers.push(member.name);
+      groupMemberData = {
+        //id as key and name, enrollment number and email as value
+        [member._id]: {
+          name: member.name,
+          enrollmentNumber: member.enrollmentNumber,
+          email: member.email,
+        },
+      };
+      groupMembers.push(groupMemberData);
     }
     const totalMembers = groupMembers.length;
     const projectId = project._id;
