@@ -328,10 +328,10 @@ router.get("/leave", auth, async (req, res) => {
   }
 });
 
-// @route   GET api/projects/remove/:id
+// @route   DELETE api/projects/remove/:id
 // @desc    Remove student from project
 // @access  Private
-router.get("/remove/:id", auth, async (req, res) => {
+router.delete("/remove/:id", auth, async (req, res) => {
   try {
     if (req.user.role !== "faculty" && req.user.role !== "student") {
       return res.status(401).json({ msg: "Not authorized" });
