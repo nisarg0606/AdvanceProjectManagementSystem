@@ -223,10 +223,12 @@ router.delete("/:id", auth, async (req, res) => {
     // Remove project from faculty
     if (project.faculty) {
       const faculty = await Faculty.findById(project.faculty);
-      faculty.projectCount -= 1;
-      faculty.projects = faculty.projects.filter(
-        (project) => project._id !== req.params.id
-      );
+      //firstly find thee project in faculty.projects array if it exists then remove it and decrement projectCount else do nothing
+      const index = faculty.projects.indexOf(project._id);
+      if (index > -1) {
+        faculty.projects.splice(index, 1);
+        faculty.projectCount -= 1;
+      }
       await faculty.save();
     }
 
