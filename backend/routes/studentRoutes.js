@@ -106,7 +106,7 @@ router.get("/group", auth, async (req, res) => {
       const member = await Student.findById(project.students[i]);
       // take member+loopvalue as key and name, email, enrollment number as value
       groupMembers.push({
-        ["member" + i + 1]: {
+        ["member" + (i + 1)]: {
           _id: member._id,
           name: member.name,
           email: member.email,
