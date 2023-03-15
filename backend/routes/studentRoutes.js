@@ -34,6 +34,7 @@ router.get("/dashboard", auth, async (req, res) => {
       groupMembers.push(member.name);
     }
     const totalMembers = groupMembers.length;
+    const projectId = project._id;
     // get project title
     const projectTitle = project.title;
     const projectDescription = project.description;
@@ -48,6 +49,7 @@ router.get("/dashboard", auth, async (req, res) => {
     const facultyEmail = faculty.email;
     const facultyPhone = faculty.phoneNumber;
     res.status(200).json({
+      projectId,
       projectTitle,
       projectDescription,
       project_type,
