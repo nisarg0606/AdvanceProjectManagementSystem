@@ -101,6 +101,7 @@ router.get("/group", auth, async (req, res) => {
         .status(404)
         .json({ msg: "Group not found as you do not have any projects" });
     }
+    const leaderEmail = await Student.findById(project.leader).select("email");
     const groupMembers = [];
     for (let i = 0; i < project.students.length; i++) {
       const member = await Student.findById(project.students[i]);
@@ -114,7 +115,7 @@ router.get("/group", auth, async (req, res) => {
         },
       });
     }
-    res.status(200).json(groupMembers);
+    res.status(200).json({ leaderEmail, groupMembers });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error --> " + err.message);
