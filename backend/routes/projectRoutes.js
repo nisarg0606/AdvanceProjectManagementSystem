@@ -339,6 +339,9 @@ router.delete("/remove/:id", auth, async (req, res) => {
     if (req.user.isLeader === false) {
       return res.status(401).json({ msg: "You are not a leader" });
     }
+    if(req.user._id === req.params.id) {
+      return res.status(401).json({ msg: "You cannot remove yourself as you are the leader for this project" });
+    }
     const project = await Project.findById(req.user.project_id);
     if (!project) {
       return res.status(404).json({ msg: "Project not found 329" });
