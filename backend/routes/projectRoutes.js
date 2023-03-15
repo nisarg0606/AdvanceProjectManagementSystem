@@ -166,24 +166,24 @@ router.put("/:id", auth, async (req, res) => {
     if (req.user.role !== "student") {
       return res.status(401).json({ msg: "Not authorized" });
     }
-    if (req.user.project_id !== req.params.id) {
+    console.log(req.user.project_id);
+    if (req.user.project_id.toString() !== req.params.id) {
       return res.status(401).json({ msg: "Not authorized" });
     }
     if (req.user.isLeader === false) {
       return res.status(401).json({ msg: "Not authorized" });
     }
 
-    await Project.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true },
-      (err, project) => {
-        if (err) {
-          return res.status(404).json({ msg: "Project not found 172" });
-        }
-        res.status(200).json(project);
-      }
-    );
+    let project = await Project.findById(req.params.id);
+    if (project) {
+      // Update
+      project = await Project.findByIdAndUpdate(
+        req.params.id,
+        { $set: projectFields },
+        { new: true }
+      );
+      return res.status(200).json(project);
+    }
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Error updating project --> " + err.message);
