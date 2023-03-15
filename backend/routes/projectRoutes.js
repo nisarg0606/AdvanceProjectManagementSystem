@@ -198,7 +198,7 @@ router.delete("/:id", auth, async (req, res) => {
     if (req.user.role !== "student") {
       return res.status(401).json({ msg: "Not authorized" });
     }
-    if (req.user.project_id !== req.params.id) {
+    if (req.user.project_id.toString() !== req.params.id) {
       return res.status(401).json({ msg: "Not authorized" });
     }
     if (req.user.isLeader === false) {
