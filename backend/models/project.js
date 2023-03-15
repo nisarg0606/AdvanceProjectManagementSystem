@@ -55,10 +55,6 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  leader_phoneNumber: {
-    type: String,
-    required: true,
-  },
   faculty: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Faculty",
