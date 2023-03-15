@@ -27,6 +27,7 @@ router.get("/available", auth, async (req, res) => {
     }).select("name projectCount maxProjects");
     const facultyNames = faculties.map((faculty) => {
       return {
+        _id: faculty._id,
         name: faculty.name,
         remainingProjects: faculty.maxProjects - faculty.projectCount,
       };

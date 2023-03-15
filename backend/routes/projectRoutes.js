@@ -91,7 +91,7 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { title, description, faculty_id } = req.body;
+    const { title, description, faculty_id, groupName } = req.body;
     if(!faculty_id) return res.status(400).json({ msg: "Faculty is required" });
     try {
       if (req.user.role !== "student") {
@@ -109,6 +109,7 @@ router.post(
         //push user._id to student array
         students: [req.user._id],
         invite_code: generateInviteCode(),
+        groupName,
       });
       const project = await newProject.save();
 
