@@ -105,14 +105,14 @@ router.get("/group", auth, async (req, res) => {
     const groupMemberData = {};
     for (let i = 0; i < project.students.length; i++) {
       const member = await Student.findById(project.students[i]);
-      // groupMemberData._id = member._id;
-      groupMemberData.name = member.name;
-      groupMemberData.email = member.email;
-      groupMemberData.enrollment_number = member.enrollment_number;
       // take id as key and name, email, enrollment number as value
       groupMembers.push({
-        [member._id]: groupMemberData,
-      });
+        [member._id]: {
+          name: member.name,
+          email: member.email,
+          enrollment_number: member.enrollment_number,
+        }
+      })
     }
     res.status(200).json(groupMembers);
   } catch (err) {
