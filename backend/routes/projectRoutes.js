@@ -24,28 +24,15 @@ router.get("/", auth, async (req, res) => {
     //get name of leader
     const leader = await Student.findById(project.leader);
     project.leader = leader.name;
+    project.leader_email = leader.email;
+    project.leader_phoneNumber = leader.phoneNumber;
     //get name of faculty
     const faculty = await Faculty.findById(project.faculty);
     project.faculty = faculty.name;
     //get name of students
     const students = await Student.find({ _id: { $in: project.students } });
     project.students = students.map((student) => student.name);
-    if (req.user.isLeader) {
-      res.status(200).json(project);
-    } else {
-      res.status(200).json({
-        title: project.title,
-        description: project.description,
-        faculty: project.faculty,
-        students: project.students,
-        status: project.status,
-        isApproved: project.isApproved,
-        comments: project.comments,
-        report_link: project.report_link,
-        presentation_link: project.presentation_link,
-        repository_link: project.repository_link,
-      });
-    }
+    res.status(200).json(project);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -92,7 +79,8 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
     const { title, description, faculty_id, groupName } = req.body;
-    if(!faculty_id) return res.status(400).json({ msg: "Faculty is required" });
+    if (!faculty_id)
+      return res.status(400).json({ msg: "Faculty is required" });
     try {
       if (req.user.role !== "student") {
         return res.status(401).json({ msg: "Not authorized" });
@@ -144,7 +132,20 @@ const generateInviteCode = () => {
 // @desc    Update project
 // @access  Private
 router.put("/:id", auth, async (req, res) => {
-  const { title, description, status, repository_link, report_link, frontendTechnologies, backendTechnologies, database, presentation_link, groupName, company, company_email } = req.body;
+  const {
+    title,
+    description,
+    status,
+    repository_link,
+    report_link,
+    frontendTechnologies,
+    backendTechnologies,
+    database,
+    presentation_link,
+    groupName,
+    company,
+    company_email,
+  } = req.body;
   // Build project object
   const projectFields = {};
   if (title) projectFields.title = title;
@@ -154,8 +155,10 @@ router.put("/:id", auth, async (req, res) => {
   // if (capacity) projectFields.capacity = capacity;
   if (repository_link) projectFields.repository_link = repository_link;
   if (report_link) projectFields.report_link = report_link;
-  if (frontendTechnologies) projectFields.frontendTechnologies = frontendTechnologies;
-  if (backendTechnologies) projectFields.backendTechnologies = backendTechnologies;
+  if (frontendTechnologies)
+    projectFields.frontendTechnologies = frontendTechnologies;
+  if (backendTechnologies)
+    projectFields.backendTechnologies = backendTechnologies;
   if (database) projectFields.database = database;
   if (presentation_link) projectFields.presentation_link = presentation_link;
   if (groupName) projectFields.groupName = groupName;
