@@ -348,9 +348,11 @@ router.delete("/remove/:id", auth, async (req, res) => {
     student.project_id = null;
     await student.save();
     // Remove student from project
-    project.students = project.students.filter(
-      (student) => student._id !== req.params.id
-    );
+    //find the index of student in the student array
+    const index = project.students.indexOf(req.params.id);
+    if (index > -1) {
+      project.students.splice(index, 1);
+    }
     //change invite code
     project.invite_code = generateInviteCode();
     // if project has reached max number of students, set invite code to null
