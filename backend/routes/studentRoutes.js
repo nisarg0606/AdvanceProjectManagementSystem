@@ -71,5 +71,20 @@ router.get("/dashboard", auth, async (req, res) => {
   }
 });
 
+// @route   GET api/student/profile
+// @desc    Get student profile
+// @access  Private
+router.get("/profile", auth, async (req, res) => {
+  try {
+    const student = await Student.findById(req.user._id).select("-password");
+    if (!student) {
+      return res.status(404).json({ msg: "Student not found" });
+    }
+    res.status(200).json(student);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error --> " + err.message);
+  }
+});
 
 module.exports = router;
