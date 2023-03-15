@@ -19,29 +19,22 @@ router.get("/dashboard", auth, async (req, res) => {
     if (!project) {
       return res.status(404).json({ msg: "Projects not found" });
     }
-    if(project.status === "rejected" && project.isApproved === false){
-        const comments = project.comments;
-        const message = "Please delete this project by clicking the delete button here and create a new one";
-        return res.status(205).json({message,comments});
+    if (project.status === "rejected" && project.isApproved === false) {
+      const comments = project.comments;
+      const message =
+        "Please delete this project by clicking the delete button here and create a new one";
+      return res.status(205).json({ message, comments });
     }
     // get leader name and email
-    const leader = await Student.findOne({ _id: leaderId }).select( "name email");
+    const leader = await Student.findOne({ _id: leaderId }).select(
+      "name email"
+    );
     const leaderName = leader.name;
     const leaderEmail = leader.email;
-    // get group members ket as id and value as name, enrollment number and email
-    let groupMembers = [];
-    let groupMemberData = {}; 
+    const groupMembers = [];
     for (let i = 0; i < project.students.length; i++) {
       const member = await Student.findById(project.students[i]);
-      groupMemberData = {
-        //id as key and name, enrollment number and email as value
-        [member._id]: {
-          name: member.name,
-          enrollmentNumber: member.enrollmentNumber,
-          email: member.email,
-        },
-      };
-      groupMembers.push(groupMemberData);
+      groupMembers.push(member.name);
     }
     const totalMembers = groupMembers.length;
     const projectId = project._id;
@@ -97,4 +90,34 @@ router.get("/profile", auth, async (req, res) => {
   }
 });
 
+// @route   GET api/student/group
+// @desc    Get student group
+// @access  Private
+router.get("/group", auth, async (req, res) => {
+  try {
+    const project = await Project.findOne({ _id: req.user.project_id });
+    if (!project) {
+      return res
+        .status(404)
+        .json({ msg: "Group not found as you do not have any projects" });
+    }
+    const groupMembers = [];
+    const groupMemberData = {};
+    for (let i = 0; i < project.students.length; i++) {
+      const member = await Student.findById(project.students[i]);
+      // groupMemberData._id = member._id;
+      groupMemberData.name = member.name;
+      groupMemberData.email = member.email;
+      groupMemberData.enrollment_number = member.enrollment_number;
+      // take id as key and name, email, enrollment number as value
+      groupMembers.push({
+        [member._id]: groupMemberData,
+      });
+    }
+    res.status(200).json(groupMembers);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error --> " + err.message);
+  }
+});
 module.exports = router;
