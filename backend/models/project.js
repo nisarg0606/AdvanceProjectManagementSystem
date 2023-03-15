@@ -53,7 +53,6 @@ const ProjectSchema = new mongoose.Schema({
   },
   leader_email: {
     type: String,
-    required: true,
   },
   faculty: {
     type: mongoose.Schema.Types.ObjectId,
