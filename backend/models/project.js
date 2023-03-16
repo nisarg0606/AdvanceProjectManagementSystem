@@ -102,11 +102,11 @@ const ProjectSchema = new mongoose.Schema({
   },
   company: {
     type: String,
-    default: "vsitr",
+    // default: "vsitr",
   },
   company_email: {
     type: String,
-    default: "vsitr@gmail.com",
+    // default: "vsitr@gmail.com",
   },
   frontendTechnologies: {
     type: String,

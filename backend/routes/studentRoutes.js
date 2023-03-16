@@ -123,8 +123,9 @@ router.get("/group", auth, async (req, res) => {
   }
 });
 
-
-//get project id of logged in student
+// @route   GET api/student/projectid
+// @desc    Get project id of logged in student
+// @access  Private
 router.get("/projectid", auth, async (req, res) => {
   try {
     const project = await Project.findOne({ _id: req.user.project_id });

@@ -7,6 +7,7 @@ const { body, validationResult, check } = require("express-validator");
 const Project = require("../models/project");
 const Faculty = require("../models/faculty");
 const Student = require("../models/student");
+const { uniqueNamesGenerator, colors, starWars } = require("unique-names-generator");
 
 // @route   GET api/projects
 // @desc    Get project of logged in user
@@ -71,6 +72,12 @@ router.post(
     [
       check("title", "Title is required").not().isEmpty(),
       check("description", "Description is required").not().isEmpty(),
+      check("semester", "Semester is required").not().isEmpty(),
+      check("faculty_id", "Faculty is required").not().isEmpty(),
+      check("project_type", "Project type is required").not().isEmpty(),
+      check("frontendTechnologies", "Frontend technologies is required").not().isEmpty(),
+      check("backendTechnologies", "Backend technologies is required").not().isEmpty(),
+      check("database", "Database is required").not().isEmpty(),
     ],
   ],
   async (req, res) => {
@@ -78,7 +85,7 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { title, description, faculty_id, groupName } = req.body;
+    const { title, description, faculty_id, project_type, frontendTechnologies, backendTechnologies, database, company, company_email } = req.body;
     if (!faculty_id)
       return res.status(400).json({ msg: "Faculty is required" });
     try {
@@ -88,6 +95,9 @@ router.post(
       if (req.user.project_id) {
         return res.status(401).json({ msg: "You already have a project" });
       }
+      let groupname = generateGroupName() + "---" + title ;
+      //remove space in groupname
+      groupname = groupname.replace(/\s/g, '_');
 
       const newProject = new Project({
         title,
@@ -97,7 +107,13 @@ router.post(
         //push user._id to student array
         students: [req.user._id],
         invite_code: generateInviteCode(),
-        groupName,
+        groupName: groupname,
+        project_type,
+        frontendTechnologies,
+        backendTechnologies,
+        database,
+        company,
+        company_email,
       });
       const project = await newProject.save();
 
@@ -123,6 +139,14 @@ router.post(
   }
 );
 
+//generate random name for group
+const generateGroupName = () => {
+  let name = uniqueNamesGenerator({
+    dictionaries: [adjectives, colors, starWars],
+    length: 2,
+  })
+  return name;
+};
 // generate invite code
 const generateInviteCode = () => {
   return Math.random().toString(36).substring(2, 15);
