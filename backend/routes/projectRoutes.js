@@ -539,6 +539,7 @@ router.post("/comment/:id", auth, async (req, res) => {
       text,
       name: req.user.name,
       user: req.user._id,
+      email: req.user.email,
     });
     await project.save();
     project = await getProjectLeaderFacultyStudents(project);
