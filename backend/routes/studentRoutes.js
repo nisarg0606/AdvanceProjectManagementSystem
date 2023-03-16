@@ -122,4 +122,22 @@ router.get("/group", auth, async (req, res) => {
     res.status(500).send("Server Error --> " + err.message);
   }
 });
+
+
+//get project id of logged in student
+router.get("/projectid", auth, async (req, res) => {
+  try {
+    const project = await Project.findOne({ _id: req.user.project_id });
+    if (!project) {
+      return res
+        .status(404)
+        .json({ msg: "Group not found as you do not have any projects" });
+    }
+    const projectId = project._id;
+    res.status(200).json(projectId);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error --> " + err.message);
+  }
+});
 module.exports = router;
