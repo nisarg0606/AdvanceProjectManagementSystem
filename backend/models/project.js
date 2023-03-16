@@ -14,6 +14,10 @@ const CommentSchema = new mongoose.Schema({
     refPath: "onModel",
     // required: true,
   },
+  email: {
+    type: String,
+    // required: true,
+  },
   onModel: {
     type: String,
     enum: ["Faculty", "Student"],
