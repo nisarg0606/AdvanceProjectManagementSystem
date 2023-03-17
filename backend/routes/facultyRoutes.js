@@ -217,12 +217,21 @@ router.get("/groups", auth, async (req, res) => {
       //replace spaces in groupname with _
       group.groupName = group.groupName.replace(/\s/g, "_");
       const leader = await Student.findById(group.leader).select("name email");
+      if(!leader) return res.status(404).json({ msg: "Leader not found for group " + group.groupName });
       group.leader = { id: leader._id, name: leader.name, email: leader.email };
       const students = [];
       for (let j = 0; j < group.students.length; j++) {
         const student = await Student.findById(group.students[j]).select(
           "name email"
         );
+        if(!student) {
+          //remove that student from group
+          console.log("Student not found for group " + group.groupName);
+          group.students.splice(j, 1);
+          //save group
+          await group.save();
+          continue;
+        }
         students.push({ id: student._id, name: student.name, email: student.email });
       }
       //use students id as key and name as value

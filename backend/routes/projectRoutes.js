@@ -7,7 +7,12 @@ const { body, validationResult, check } = require("express-validator");
 const Project = require("../models/project");
 const Faculty = require("../models/faculty");
 const Student = require("../models/student");
-const { uniqueNamesGenerator, colors, adjectives, starWars } = require("unique-names-generator");
+const {
+  uniqueNamesGenerator,
+  colors,
+  adjectives,
+  starWars,
+} = require("unique-names-generator");
 
 // @route   GET api/projects
 // @desc    Get project of logged in user
@@ -75,8 +80,12 @@ router.post(
       check("semester", "Semester is required").not().isEmpty(),
       check("faculty_id", "Faculty is required").not().isEmpty(),
       check("project_type", "Project type is required").not().isEmpty(),
-      check("frontendTechnologies", "Frontend technologies is required").not().isEmpty(),
-      check("backendTechnologies", "Backend technologies is required").not().isEmpty(),
+      check("frontendTechnologies", "Frontend technologies is required")
+        .not()
+        .isEmpty(),
+      check("backendTechnologies", "Backend technologies is required")
+        .not()
+        .isEmpty(),
       check("database", "Database is required").not().isEmpty(),
     ],
   ],
@@ -85,7 +94,18 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { title, description, faculty_id, project_type, frontendTechnologies, backendTechnologies, database, company, company_email, capacity } = req.body;
+    const {
+      title,
+      description,
+      faculty_id,
+      project_type,
+      frontendTechnologies,
+      backendTechnologies,
+      database,
+      company,
+      company_email,
+      capacity,
+    } = req.body;
     if (!faculty_id)
       return res.status(400).json({ msg: "Faculty is required" });
     try {
@@ -95,9 +115,9 @@ router.post(
       if (req.user.project_id) {
         return res.status(401).json({ msg: "You already have a project" });
       }
-      let groupname = generateGroupName() + "---" + title ;
+      let groupname = generateGroupName() + "---" + title;
       //remove space in groupname
-      groupname = groupname.replace(/\s/g, '_');
+      groupname = groupname.replace(/\s/g, "_");
 
       const newProject = new Project({
         title,
@@ -145,7 +165,7 @@ const generateGroupName = () => {
   let name = uniqueNamesGenerator({
     dictionaries: [adjectives, colors, starWars],
     length: 2,
-  })
+  });
   return name;
 };
 // generate invite code
@@ -364,8 +384,10 @@ router.delete("/remove/:id", auth, async (req, res) => {
     if (req.user.isLeader === false) {
       return res.status(401).json({ msg: "You are not a leader" });
     }
-    if(req.user._id === req.params.id) {
-      return res.status(401).json({ msg: "You cannot remove yourself as you are the leader for this project" });
+    if (req.user._id === req.params.id) {
+      return res.status(401).json({
+        msg: "You cannot remove yourself as you are the leader for this project",
+      });
     }
     const project = await Project.findById(req.user.project_id);
     if (!project) {
@@ -652,6 +674,26 @@ router.get("/all/projects", auth, async (req, res) => {
     }
     res.status(200).json(data);
     // res.status(200).json(projects);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error --> " + err.message);
+  }
+});
+
+// @route   GET api/projects/setProjectStatus
+// @desc    Set project status
+// @access  Private
+router.post("/set/ProjectStatus", auth, async (req, res) => {
+  try {
+    const { status } = req.body;
+    // get project id from user session
+    const project = await Project.findById(req.user.project_id.toString());
+    if (!project) {
+      return res.status(404).json({ msg: "Project not found 670" });
+    }
+    project.status = status;
+    await project.save();
+    res.status(200).json({ msg: "Project status updated" });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error --> " + err.message);
