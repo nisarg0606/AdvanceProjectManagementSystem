@@ -229,7 +229,12 @@ router.get("/groups", auth, async (req, res) => {
           console.log("Student not found for group " + group.groupName);
           group.students.splice(j, 1);
           //save group
-          await group.save();
+          const saveGroup = await Project.findByIdAndUpdate(group._id, group, {
+            new: true,
+          });
+          if (!saveGroup) {
+            return res.status(404).json({ msg: "Group not found" });
+          }
           continue;
         }
         students.push({ id: student._id, name: student.name, email: student.email });
