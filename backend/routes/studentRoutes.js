@@ -46,6 +46,7 @@ router.get("/dashboard", auth, async (req, res) => {
     const project_status = project.status;
     const project_comments = project.comments;
     const project_isApproved = project.isApproved;
+    const invite_code = project.invite_code;
     // get faculty name, email and phone number
     const faculty = await Faculty.findById(project.faculty);
     const facultyName = faculty.name;
@@ -60,6 +61,7 @@ router.get("/dashboard", auth, async (req, res) => {
       project_comments,
       project_isApproved,
       project_company,
+      invite_code,
       facultyName,
       facultyEmail,
       facultyPhone,
