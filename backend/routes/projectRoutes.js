@@ -7,7 +7,7 @@ const { body, validationResult, check } = require("express-validator");
 const Project = require("../models/project");
 const Faculty = require("../models/faculty");
 const Student = require("../models/student");
-const { uniqueNamesGenerator, colors, starWars } = require("unique-names-generator");
+const { uniqueNamesGenerator, colors, adjectives, starWars } = require("unique-names-generator");
 
 // @route   GET api/projects
 // @desc    Get project of logged in user
