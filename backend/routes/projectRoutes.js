@@ -85,7 +85,7 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { title, description, faculty_id, project_type, frontendTechnologies, backendTechnologies, database, company, company_email } = req.body;
+    const { title, description, faculty_id, project_type, frontendTechnologies, backendTechnologies, database, company, company_email, capacity } = req.body;
     if (!faculty_id)
       return res.status(400).json({ msg: "Faculty is required" });
     try {
@@ -114,6 +114,7 @@ router.post(
         database,
         company,
         company_email,
+        capacity,
       });
       const project = await newProject.save();
 
