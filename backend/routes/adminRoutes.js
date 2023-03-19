@@ -273,6 +273,7 @@ function generateRandomPassword() {
     numbers: true,
     symbols: true,
     uppercase: true,
+    exclude: "{}/\\[]()<>~`!$%^&+=|;:,\"?'",
     strict: true,
   });
   console.log(password);
