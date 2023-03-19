@@ -34,7 +34,7 @@ const StudentSchema = new mongoose.Schema({
     validate: {
       validator: function (v) {
         // password must contain at least one uppercase letter, one lowercase letter, one number, one special character, and be at least 8 characters long
-        return /^(?=.*[!@#$%^&*(),.?":{}|<>])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$/.test(
+        return /^(?=.*[!@#$&*.:-_)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$/.test(
           v
         );
       },

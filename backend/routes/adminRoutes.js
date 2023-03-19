@@ -23,6 +23,7 @@ const upload = multer({
 const Student = require("../models/student");
 const Faculty = require("../models/faculty");
 const Admin = require("../models/admin");
+const { generateRandomPassword } = require("../utils/helperFuntions");
 
 // @route   GET api/admin
 // @desc    Get all users
@@ -265,19 +266,6 @@ router.post("/add-faculty", auth, async (req, res) => {
   }
 });
 
-function generateRandomPassword() {
-  //   password should contain atleast 1 uppercase, 1 lowercase, 1 number and 1 special character
-  //npm i password-generator
-  const password = generator.generate({
-    length: 10,
-    numbers: true,
-    symbols: true,
-    uppercase: true,
-    strict: true,
-  });
-  console.log(password);
-  return password;
-}
 
 // @route   DELETE api/admin/delete-student/:id
 // @desc    delete student

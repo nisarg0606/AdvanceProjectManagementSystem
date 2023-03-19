@@ -21,7 +21,7 @@ const AdminSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function (v) {
-        return /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#\$%\^&\*])(?=.{8,})/.test(
+        return /^(?=.*[!@#$&*.:-_)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$/.test(
           v
         );
       },
