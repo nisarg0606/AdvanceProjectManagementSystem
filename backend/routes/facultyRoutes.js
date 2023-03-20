@@ -289,7 +289,7 @@ router.get("/getStudents/:id", auth, async (req, res) => {
       return res.status(404).json({ msg: "Project not found" });
     }
     //get students
-    const students = [];
+    let students = [];
     for (let i = 0; i < project.students.length; i++) {
       const student = await Student.findById(project.students[i]).select(
         "_id name email"
