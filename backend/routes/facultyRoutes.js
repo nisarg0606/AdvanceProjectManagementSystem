@@ -250,7 +250,7 @@ router.get("/groups", auth, async (req, res) => {
       //use students id as key and name as value
       const studentsjson = {};
       for (let i = 0; i < students.length; i++) {
-        studentsjson[students[i].id] = students[i];
+        studentsjson["student" + (i+1)] = students[i];
       }
       group.students = studentsjson;
       groupsData.push(group);
@@ -271,37 +271,41 @@ router.get("/groups", auth, async (req, res) => {
 // @route   DELETE api/faculty/removeStudentFromGroup/:id/:studentId
 // @desc    Remove student from group
 // @access  Private
-router.delete("/removeStudentFromGroup/:id/:studentId", auth, async (req, res) => {
-  try {
-    // if role is not faculty then return error
-    if (req.user.role !== "faculty") {
-      return res.status(401).json({ msg: "Not authorized" });
+router.delete(
+  "/removeStudentFromGroup/:id/:studentId",
+  auth,
+  async (req, res) => {
+    try {
+      // if role is not faculty then return error
+      if (req.user.role !== "faculty") {
+        return res.status(401).json({ msg: "Not authorized" });
+      }
+      const faculty = await Faculty.findById(req.user._id).select("-password");
+      if (!faculty) {
+        return res.status(404).json({ msg: "Faculty not found" });
+      }
+      // get id and student id from params
+      const { id, studentId } = req.params;
+      //find project
+      const project = await Project.findById(id);
+      if (!project) {
+        return res.status(404).json({ msg: "Project not found" });
+      }
+      //check if student is in group
+      const studentIndex = project.students.indexOf(studentId);
+      if (studentIndex === -1) {
+        return res.status(404).json({ msg: "Student not found in group" });
+      }
+      //remove student from group
+      project.students.splice(studentIndex, 1);
+      //save project
+      await project.save();
+      res.status(200).json({ msg: "Student removed from group" });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server Error");
     }
-    const faculty = await Faculty.findById(req.user._id).select("-password");
-    if (!faculty) {
-      return res.status(404).json({ msg: "Faculty not found" });
-    }
-    // get id and student id from params
-    const { id, studentId } = req.params;
-    //find project
-    const project = await Project.findById(id);
-    if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
-    }
-    //check if student is in group
-    const studentIndex = project.students.indexOf(studentId);
-    if (studentIndex === -1) {
-      return res.status(404).json({ msg: "Student not found in group" });
-    }
-    //remove student from group
-    project.students.splice(studentIndex, 1);
-    //save project
-    await project.save();
-    res.status(200).json({ msg: "Student removed from group" });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
   }
-});
+);
 
 module.exports = router;
