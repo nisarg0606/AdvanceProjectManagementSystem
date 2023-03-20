@@ -173,9 +173,9 @@ router.post("/add-faculties", auth, upload.single("file"), async (req, res) => {
     //send email to all the faculties
     try {
       userObjects.forEach(async (user) => {
-        await sendWelcomeEmailWithPasswordToStudent(
-          user.name,
+        await sendWelcomeEmailWithPasswordToFaculty(
           user.email,
+          user.name,
           user.password
         );
       });
@@ -252,7 +252,7 @@ router.post("/add-faculty", auth, async (req, res) => {
       await sendWelcomeEmailWithPasswordToFaculty(
         email,
         name,
-        generateRandomPassword()
+        faculty.password
       );
     } catch (error) {
       console.error(error);

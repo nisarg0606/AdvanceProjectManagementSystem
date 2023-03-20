@@ -700,4 +700,83 @@ router.post("/set/ProjectStatus", auth, async (req, res) => {
   }
 });
 
+// @route   POST api/projects/submission
+// @desc    Submit project report, presentation and repository link
+// @access  Private
+router.post("/submission", auth, async (req, res) => {
+  try {
+    const { report, presentation, repository } = req.body;
+    // get project id from user session
+    const project = await Project.findById(req.user.project_id.toString());
+    if (!project) {
+      return res.status(404).json({ msg: "Project not found 712" });
+    }
+    // check if report link is there in body
+    if (report) {
+      project.report = report;
+    }
+    // check if presentation link is there in body
+    if (presentation) {
+      project.presentation = presentation;
+    }
+    // check if repository link is there in body
+    if (repository) {
+      project.repository = repository;
+    }
+    await project.save();
+    res.status(200).json({ msg: "Project submission updated" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error --> " + err.message);
+  }
+});
+
+// @route   PUT api/projects/submission
+// @desc    Update project report, presentation and repository link
+// @access  Private
+router.put("/submission", auth, async (req, res) => {
+  try {
+    const { report, presentation, repository } = req.body;
+    // get project id from user session
+    const project = await Project.findById(req.user.project_id.toString());
+    if (!project) {
+      return res.status(404).json({ msg: "Project not found 743" });
+    }
+    // check if report link is there in body
+    if (report) {
+      project.report = report;
+    }
+    // check if presentation link is there in body
+    if (presentation) {
+      project.presentation = presentation;
+    }
+    // check if repository link is there in body
+    if (repository) {
+      project.repository = repository;
+    }
+    await project.save();
+    res.status(200).json({ msg: "Project submission updated" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error --> " + err.message);
+  }
+});
+
+// @route   GET api/projects/submission
+// @desc    Get project report, presentation and repository link
+// @access  Private
+router.get("/submission", auth, async (req, res) => {
+  try {
+    // get project id from user session
+    const project = await Project.findById(
+      req.user.project_id.toString()
+    ).select("_id presentation_link report_link repository_link");
+
+    res.status(200).json(project);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error --> " + err.message);
+  }
+});
+
 module.exports = router;

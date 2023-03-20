@@ -98,7 +98,7 @@ router.get("/requests", auth, async (req, res) => {
     const projects = await Project.find({
       faculty: req.user._id,
       isApproved: false,
-      status: "active"
+      status: "active",
     });
     for (let i = 0; i < projects.length; i++) {
       //get project id
@@ -210,6 +210,7 @@ router.get("/groups", auth, async (req, res) => {
     let groups = await Project.find({
       faculty: req.user._id,
       isApproved: true,
+      status: "active",
     });
     const groupsData = [];
     for (let i = 0; i < groups.length; i++) {
@@ -217,14 +218,17 @@ router.get("/groups", auth, async (req, res) => {
       //replace spaces in groupname with _
       group.groupName = group.groupName.replace(/\s/g, "_");
       const leader = await Student.findById(group.leader).select("name email");
-      if(!leader) return res.status(404).json({ msg: "Leader not found for group " + group.groupName });
+      if (!leader)
+        return res
+          .status(404)
+          .json({ msg: "Leader not found for group " + group.groupName });
       group.leader = { id: leader._id, name: leader.name, email: leader.email };
       const students = [];
       for (let j = 0; j < group.students.length; j++) {
         const student = await Student.findById(group.students[j]).select(
           "name email"
         );
-        if(!student) {
+        if (!student) {
           //remove that student from group
           console.log("Student not found for group " + group.groupName);
           group.students.splice(j, 1);
@@ -237,7 +241,11 @@ router.get("/groups", auth, async (req, res) => {
           }
           continue;
         }
-        students.push({ id: student._id, name: student.name, email: student.email });
+        students.push({
+          id: student._id,
+          name: student.name,
+          email: student.email,
+        });
       }
       //use students id as key and name as value
       const studentsjson = {};
@@ -251,10 +259,45 @@ router.get("/groups", auth, async (req, res) => {
     const groupsjson = {};
     for (let i = 0; i < groupsData.length; i++) {
       //set group name as key and group data as array
-      groupsjson["Group" + (i+1)] = groupsData[i];
+      groupsjson["Group" + (i + 1)] = groupsData[i];
     }
     res.status(200).json(groupsjson);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
 
+// @route   DELETE api/faculty/removeStudentFromGroup/:id/:studentId
+// @desc    Remove student from group
+// @access  Private
+router.delete("/removeStudentFromGroup/:id/:studentId", auth, async (req, res) => {
+  try {
+    // if role is not faculty then return error
+    if (req.user.role !== "faculty") {
+      return res.status(401).json({ msg: "Not authorized" });
+    }
+    const faculty = await Faculty.findById(req.user._id).select("-password");
+    if (!faculty) {
+      return res.status(404).json({ msg: "Faculty not found" });
+    }
+    // get id and student id from params
+    const { id, studentId } = req.params;
+    //find project
+    const project = await Project.findById(id);
+    if (!project) {
+      return res.status(404).json({ msg: "Project not found" });
+    }
+    //check if student is in group
+    const studentIndex = project.students.indexOf(studentId);
+    if (studentIndex === -1) {
+      return res.status(404).json({ msg: "Student not found in group" });
+    }
+    //remove student from group
+    project.students.splice(studentIndex, 1);
+    //save project
+    await project.save();
+    res.status(200).json({ msg: "Student removed from group" });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");

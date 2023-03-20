@@ -14,6 +14,9 @@ const router = express.Router();
 // @access  Private
 router.get("/dashboard", auth, async (req, res) => {
   try {
+    if (req.user.project_id === null) {
+      return res.status(404).json({ msg: "You do not have any projects" });
+    }
     const project = await Project.findOne({ _id: req.user.project_id });
     let leaderId = project.leader;
     if (!project) {
