@@ -310,7 +310,9 @@ router.get("/getStudents/:id", auth, async (req, res) => {
     for (let i = 0; i < students.length; i++) {
       studentsjson["student" + (i + 1)] = students[i];
     }
-    res.status(200).json(studentsjson);
+    students = [];
+    students = studentsjson;
+    res.status(200).json(students);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
