@@ -51,10 +51,22 @@ router.get("/", auth, async (req, res) => {
 // @access  Private
 router.post("/add-students", auth, upload.single("file"), async (req, res) => {
   try {
+    // Check if file is present
     if (!req.file) return res.status(400).send("Please upload a file.");
+    // Check if file is csv
     if (!req.file.originalname.match(/\.(csv)$/))
       return res.status(400).send("Please upload a CSV file.");
+    // Check if user is admin
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
+    // Check if csv contains email, name, enrollment_number, department as headers
+    if (
+      !req.file.originalname.match(
+        /(email, name, enrollment_number, department)/
+      )
+    )
+      return res
+        .status(400)
+        .send("Please upload a CSV file with correct headers.");
     // Convert CSV buffer to JSON
     const students = await csvtojson({
       // ignore first row
@@ -265,7 +277,6 @@ router.post("/add-faculty", auth, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 // @route   DELETE api/admin/delete-student/:id
 // @desc    delete student
