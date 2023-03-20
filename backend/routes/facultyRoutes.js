@@ -263,50 +263,7 @@ router.get("/groups", auth, async (req, res) => {
   }
 });
 
-// @route   GET api/faculty/getStudents/:id
-// @desc    Get students under a project
-// @access  Private
-router.get("/getStudents/:id", auth, async (req, res) => {
-  try {
-    // if role is not faculty then return error
-    if (req.user.role !== "faculty") {
-      return res.status(401).json({ msg: "Not authorized" });
-    }
-    const faculty = await Faculty.findById(req.user._id).select("-password");
-    if (!faculty) {
-      return res.status(404).json({ msg: "Faculty not found" });
-    }
-    // get id from params
-    const { id } = req.params;
-    //find project
-    const project = await Project.findById(id);
-    if (!project) {
-      return res.status(404).json({ msg: "Project not found" });
-    }
-    //get students
-    let students = [];
-    for (let i = 0; i < project.students.length; i++) {
-      const student = await Student.findById(project.students[i]).select(
-        "_id name email"
-      );
-      if (!student) {
-        //remove that student from group
-        console.log("Student not found for group " + project.groupName);
-        project.students.splice(i, 1);
-        //save group
-        await Project.findByIdAndUpdate(project._id, project, {
-          new: true,
-        });
-        continue;
-      }
-      students.push(student);
-    }
-    res.status(200).json(students);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
-  }
-});
+
 // @route   DELETE api/faculty/removeStudentFromGroup/:id/:studentId
 // @desc    Remove student from group
 // @access  Private
