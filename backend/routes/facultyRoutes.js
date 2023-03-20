@@ -247,12 +247,7 @@ router.get("/groups", auth, async (req, res) => {
           email: student.email,
         });
       }
-      //use students id as key and name as value
-      const studentsjson = {};
-      for (let i = 0; i < students.length; i++) {
-        studentsjson["student" + (i + 1)] = students[i];
-      }
-      group.students = studentsjson;
+      group.students = students;
       groupsData.push(group);
     }
     //take group name as key and group data as array
@@ -306,12 +301,6 @@ router.get("/getStudents/:id", auth, async (req, res) => {
       }
       students.push(student);
     }
-    let studentsjson = {};
-    for (let i = 0; i < students.length; i++) {
-      studentsjson["student" + (i + 1)] = students[i];
-    }
-    students = [];
-    students = studentsjson;
     res.status(200).json(students);
   } catch (err) {
     console.error(err.message);
