@@ -54,7 +54,8 @@ router.post("/add-students", auth, upload.single("file"), async (req, res) => {
     if (!req.file) return res.status(400).send("Please upload a file.");
     if (!req.file.originalname.match(/\.(csv)$/))
       return res.status(400).send("Please upload a CSV file.");
-    if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
+    if (req.user.role !== "admin")
+      return res.status(401).json({ message: "Unauthorized" });
     // Convert CSV buffer to JSON
     const students = await csvtojson({
       // ignore first row
@@ -85,10 +86,10 @@ router.post("/add-students", auth, upload.single("file"), async (req, res) => {
       (email, index) => emails.indexOf(email) !== index
     );
     if (duplicateEnrollmentNumbers.length > 0) {
-      return res.status(400).send("Duplicate enrollment numbers");
+      return res.status(400).json({ message: "Duplicate enrollment numbers" });
     }
     if (duplicateEmails.length > 0) {
-      return res.status(400).send("Duplicate emails");
+      return res.status(400).json({ message: "Duplicate emails" });
     }
     //check if any of the students already exist
     const existingStudents = await Student.find({
@@ -265,7 +266,6 @@ router.post("/add-faculty", auth, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 // @route   DELETE api/admin/delete-student/:id
 // @desc    delete student

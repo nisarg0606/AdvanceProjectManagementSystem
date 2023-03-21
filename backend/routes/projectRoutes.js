@@ -48,7 +48,7 @@ router.get("/", auth, async (req, res) => {
 // @route   GET api/projects/:id
 // @desc    Get project by ID
 // @access  Private
-router.get("/:id", auth, async (req, res) => {
+router.get("/project/:id", auth, async (req, res) => {
   try {
     if (req.user.role !== "student" && req.user.role !== "faculty") {
       return res.status(401).json({ msg: "Not authorized" });
