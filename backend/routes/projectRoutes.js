@@ -744,26 +744,18 @@ router.put("/submit/submission", auth, async (req, res) => {
     }
     // check if report link is there in body
     if (report) {
-      project.report = report;
+      project.report_link = report;
     }
     // check if presentation link is there in body
     if (presentation) {
-      project.presentation = presentation;
+      project.presentation_link = presentation;
     }
     // check if repository link is there in body
     if (repository) {
-      project.repository = repository;
+      project.repository_link = repository;
     }
     // update project
-    if(report || presentation || repository){
-      if(project){
-        project = await Project.findOneAndUpdate(
-          { _id: req.user.project_id.toString() },
-          { $set: project },
-          { new: true }
-        );
-      }
-    }
+    await project.save();
     res.status(200).json({ msg: "Project submission updated", project });
   } catch (err) {
     console.error(err.message);
