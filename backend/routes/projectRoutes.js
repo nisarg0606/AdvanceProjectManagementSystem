@@ -754,7 +754,12 @@ router.put("/submit/submission", auth, async (req, res) => {
     if (repository) {
       project.repository = repository;
     }
-    await project.save();
+    // update project
+    project = await Project.findOneAndUpdate(
+      { _id: req.user.project_id.toString() },
+      { $set: projectFields },
+      { new: true }
+    );
     res.status(200).json({ msg: "Project submission updated", project });
   } catch (err) {
     console.error(err.message);
