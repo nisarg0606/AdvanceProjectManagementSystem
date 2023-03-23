@@ -700,10 +700,10 @@ router.post("/set/ProjectStatus", auth, async (req, res) => {
   }
 });
 
-// @route   POST api/projects/submission
+// @route   POST api/projects/submit/submission
 // @desc    Submit project report, presentation and repository link
 // @access  Private
-router.post("/submission", auth, async (req, res) => {
+router.post("/submit/submission", auth, async (req, res) => {
   try {
     const { report, presentation, repository } = req.body;
     // get project id from user session
@@ -731,10 +731,10 @@ router.post("/submission", auth, async (req, res) => {
   }
 });
 
-// @route   PUT api/projects/submission
+// @route   PUT api/projects/submit/submission
 // @desc    Update project report, presentation and repository link
 // @access  Private
-router.put("/submission", auth, async (req, res) => {
+router.put("/submit/submission", auth, async (req, res) => {
   try {
     const { report, presentation, repository } = req.body;
     // get project id from user session
@@ -762,10 +762,10 @@ router.put("/submission", auth, async (req, res) => {
   }
 });
 
-// @route   GET api/projects/submission
+// @route   GET api/projects/submit/submission
 // @desc    Get project report, presentation and repository link
 // @access  Private
-router.get("/submission", auth, async (req, res) => {
+router.get("/submit/submission", auth, async (req, res) => {
   try {
     // get project id from user session
     const project = await Project.findById(
