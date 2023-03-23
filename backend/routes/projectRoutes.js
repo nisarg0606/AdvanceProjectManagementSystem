@@ -738,7 +738,7 @@ router.put("/submit/submission", auth, async (req, res) => {
   try {
     const { report, presentation, repository } = req.body;
     // get project id from user session
-    const project = await Project.findById(req.user.project_id.toString());
+    let project = await Project.findById(req.user.project_id.toString());
     if (!project) {
       return res.status(404).json({ msg: "Project not found 743" });
     }
@@ -755,6 +755,27 @@ router.put("/submit/submission", auth, async (req, res) => {
       project.repository_link = repository;
     }
     // update project
+    if(report){
+      project = await Project.findByIdAndUpdate(
+        req.user.project_id.toString(),
+        { $set: { report_link: report } },
+        { new: true }
+      );
+    }
+    if(presentation){
+      project = await Project.findByIdAndUpdate(
+        req.user.project_id.toString(),
+        { $set: { presentation_link: presentation } },
+        { new: true }
+      );
+    }
+    if(repository){
+      project = await Project.findByIdAndUpdate(
+        req.user.project_id.toString(),
+        { $set: { repository_link: repository } },
+        { new: true }
+      );
+    }
     await project.save();
     res.status(200).json({ msg: "Project submission updated", project });
   } catch (err) {
