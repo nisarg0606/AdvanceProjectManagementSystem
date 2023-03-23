@@ -20,7 +20,7 @@ const {
 router.get("/", auth, async (req, res) => {
   try {
     if (req.user.role !== "student" && req.user.role !== "faculty") {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 1" });
     }
     console.log(req.user.project_id);
     console.log(req.user.isLeader);
@@ -45,13 +45,13 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-// @route   GET api/projects/:id
+// @route   GET api/projects/project/:id
 // @desc    Get project by ID
 // @access  Private
 router.get("/project/:id", auth, async (req, res) => {
   try {
     if (req.user.role !== "student" && req.user.role !== "faculty") {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 2" });
     }
     const project = await Project.findById(req.params.id).populate("student");
     if (!project) {
@@ -110,7 +110,7 @@ router.post(
       return res.status(400).json({ msg: "Faculty is required" });
     try {
       if (req.user.role !== "student") {
-        return res.status(401).json({ msg: "Not authorized" });
+        return res.status(401).json({ msg: "Not authorized 3" });
       }
       if (req.user.project_id) {
         return res.status(401).json({ msg: "You already have a project" });
@@ -212,14 +212,14 @@ router.put("/:id", auth, async (req, res) => {
 
   try {
     if (req.user.role !== "student") {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 4" });
     }
     console.log(req.user.project_id);
     if (req.user.project_id.toString() !== req.params.id) {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 5" });
     }
     if (req.user.isLeader === false) {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 6" });
     }
 
     let project = await Project.findById(req.params.id);
@@ -244,13 +244,13 @@ router.put("/:id", auth, async (req, res) => {
 router.delete("/:id", auth, async (req, res) => {
   try {
     if (req.user.role !== "student") {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 7" });
     }
     if (req.user.project_id.toString() !== req.params.id) {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 8" });
     }
     if (req.user.isLeader === false) {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 9" });
     }
     const project = await Project.findById(req.params.id);
     if (!project) {
@@ -298,7 +298,7 @@ router.post("/join", auth, async (req, res) => {
   const { invite_code } = req.body;
   try {
     if (req.user.role !== "student" && req.user.role !== "faculty") {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 10" });
     }
     if (req.user.isLeader === true) {
       return res.status(401).json({ msg: "You are already a leader" });
@@ -336,7 +336,7 @@ router.post("/join", auth, async (req, res) => {
 router.get("/leave", auth, async (req, res) => {
   try {
     if (req.user.role !== "student") {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 11" });
     }
     if (req.user.isLeader === true) {
       return res.status(401).json({ msg: "You are a leader" });
@@ -379,7 +379,7 @@ router.get("/leave", auth, async (req, res) => {
 router.delete("/remove/:id", auth, async (req, res) => {
   try {
     if (req.user.role !== "faculty" && req.user.role !== "student") {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 12" });
     }
     if (req.user.isLeader === false) {
       return res.status(401).json({ msg: "You are not a leader" });
@@ -493,7 +493,7 @@ router.post("/reject/:id", auth, async (req, res) => {
       return res.status(400).json({ msg: "Comments are required" });
     }
     if (req.user.role !== "faculty") {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 13" });
     }
     const project = await Project.findById(req.params.id);
     if (!project) {
@@ -507,7 +507,7 @@ router.post("/reject/:id", auth, async (req, res) => {
     const facultyId = project.faculty.toString();
     const loggedUser = req.user._id.toString();
     if (facultyId !== loggedUser) {
-      return res.status(401).json({ msg: "Not authorized" });
+      return res.status(401).json({ msg: "Not authorized 14" });
     }
     //can only reject project if project has a title
     if (!project.title) {
@@ -610,7 +610,7 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
     }
     // Check user
     if (comment.user.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ msg: "User not authorized" });
+      return res.status(401).json({ msg: "User not authorized 15" });
     }
     // Get remove index
     const removeIndex = project.comments
@@ -755,7 +755,7 @@ router.put("/submission", auth, async (req, res) => {
       project.repository = repository;
     }
     await project.save();
-    res.status(200).json({ msg: "Project submission updated" });
+    res.status(200).json({ msg: "Project submission updated", project });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error --> " + err.message);
