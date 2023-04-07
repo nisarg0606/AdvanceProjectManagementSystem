@@ -14,6 +14,10 @@ const CommentSchema = new mongoose.Schema({
     refPath: "onModel",
     // required: true,
   },
+  email: {
+    type: String,
+    // required: true,
+  },
   onModel: {
     type: String,
     enum: ["Faculty", "Student"],
@@ -26,6 +30,18 @@ const CommentSchema = new mongoose.Schema({
 });
 
 const ProjectSchema = new mongoose.Schema({
+  groupName: {
+    type: String,
+    required: true,
+    unique: true,
+    default: "Group" + Math.floor(Math.random() * 10000),
+  },
+  semester: {
+    type: String,
+    required: true,
+    //sem 6, 7 or 8
+    default: "Semester" + Math.floor(Math.random() * 3 + 6),
+  },
   title: {
     type: String,
     required: true,
@@ -38,6 +54,9 @@ const ProjectSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Student",
     required: true,
+  },
+  leader_email: {
+    type: String,
   },
   faculty: {
     type: mongoose.Schema.Types.ObjectId,
@@ -87,18 +106,23 @@ const ProjectSchema = new mongoose.Schema({
   },
   company: {
     type: String,
+    // default: "vsitr",
   },
   company_email: {
     type: String,
+    // default: "vsitr@gmail.com",
   },
   frontendTechnologies: {
     type: String,
+    default: "HTML, CSS, JavaScript",
   },
   backendTechnologies: {
     type: String,
+    default: "Node.js, Express.js, MongoDB",
   },
-  databaseTechnologies: {
+  database: {
     type: String,
+    default: "MongoDB",
   },
 });
 

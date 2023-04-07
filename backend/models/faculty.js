@@ -21,7 +21,7 @@ const FacultySchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function (v) {
-        return /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#\$%\^&\*])(?=.{8,})/.test(
+        return /^(?=.*[!@#$&*.:-_)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$/.test(
           v
         );
       },
@@ -63,6 +63,7 @@ const FacultySchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Project",
+      unique: true,
     },
   ],
   projectCount: {

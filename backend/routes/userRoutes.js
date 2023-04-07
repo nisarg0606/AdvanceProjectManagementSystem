@@ -21,40 +21,34 @@ const models = {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+    if (!email || !password)
+      return res.status(400).send({ error: "Please enter all fields" });
 
     let user,
       message = null;
 
     user = await Student.findOne({ email });
     if (user) {
-      if (user.password == process.env.DEFAULT_PASSWORD) {
-        if (password != process.env.DEFAULT_PASSWORD) {
-          return res.status(401).send({ error: "Invalid login credentials" });
-        } else {
-          return res.status(200).send({
-            message:
-              "Please change your password by calling /api/users/change-password",
-          });
-        }
+      if (user.password == password) {
+        return res.status(200).send({
+          message:
+            "Please change your password by calling /api/users/change-password",
+        });
       }
+      // console.log(user);
       //   console.log("student found");
-      console.log(user);
     } else {
       user = await Faculty.findOne({ email });
       if (user) {
-        if (user.password == process.env.DEFAULT_PASSWORD) {
-          if (password != process.env.DEFAULT_PASSWORD) {
-            return res.status(401).send({ error: "Invalid login credentials" });
-          } else {
-            return res.status(200).send({
-              userId: user._id,
-              email: user.email,
-              name: user.name,
-              role: user.role,
-              message:
-                "Please change your password by calling /api/users/change-password",
-            });
-          }
+        if (user.password == password) {
+          return res.status(200).send({
+            userId: user._id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            message:
+              "Please change your password by calling /api/users/change-password",
+          });
         }
         // console.log("faculty found");
         console.log(user);
@@ -62,7 +56,7 @@ router.post("/login", async (req, res) => {
         user = await Admin.findOne({ email });
         if (user) {
           //   console.log("admin found");
-          console.log(user);
+          // console.log(user);
         }
       }
     }
@@ -88,7 +82,7 @@ router.post("/login", async (req, res) => {
     user.token = token;
     //remove password from user data
     delete user.password;
-    //set token in header 
+    //set token in header
     res.header("x-auth-token", token);
     res.status(200).json(user);
   } catch (e) {
@@ -131,19 +125,15 @@ router.post("/change-password", async (req, res) => {
     let user;
     user = await Student.findOne({ email });
     if (user) {
-      if (user.password == process.env.DEFAULT_PASSWORD) {
-        if (password != process.env.DEFAULT_PASSWORD) {
-          return res.status(401).send({ error: "Invalid login credentials" });
-        } else {
-          const salt = await bcrypt.genSalt(12);
-          const hashedPassword = await bcrypt.hash(newPassword, salt);
-          user.password = hashedPassword;
-          user.passwordChanged = true;
-          await user.save();
-          return res
-            .status(200)
-            .send({ message: "Password changed successfully" });
-        }
+      if (user.password == password) {
+        const salt = await bcrypt.genSalt(12);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        user.password = hashedPassword;
+        user.passwordChanged = true;
+        await user.save();
+        return res
+          .status(200)
+          .send({ message: "Password changed successfully" });
       } else {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch)
@@ -160,19 +150,15 @@ router.post("/change-password", async (req, res) => {
     } else {
       user = await Faculty.findOne({ email });
       if (user) {
-        if (user.password == process.env.DEFAULT_PASSWORD) {
-          if (password != process.env.DEFAULT_PASSWORD) {
-            return res.status(401).send({ error: "Invalid login credentials" });
-          } else {
-            const salt = await bcrypt.genSalt(12);
-            const hashedPassword = await bcrypt.hash(newPassword, salt);
-            user.password = hashedPassword;
-            user.passwordChanged = true;
-            await user.save();
-            return res
-              .status(200)
-              .send({ message: "Password changed successfully" });
-          }
+        if (user.password == password) {
+          const salt = await bcrypt.genSalt(12);
+          const hashedPassword = await bcrypt.hash(newPassword, salt);
+          user.password = hashedPassword;
+          user.passwordChanged = true;
+          await user.save();
+          return res
+            .status(200)
+            .send({ message: "Password changed successfully" });
         } else {
           const isMatch = await bcrypt.compare(password, user.password);
           if (!isMatch)
@@ -212,8 +198,18 @@ router.post("/change-password", async (req, res) => {
 router.get("/logout", auth, async (req, res) => {
   res.token = null;
   //add token to blacklist
-  const blacklistedToken = new BlacklistedToken({ token: req.token, expires: req.tokenExpires });
+  const blacklistedToken = new BlacklistedToken({
+    token: req.token,
+    expires: req.tokenExpires,
+  });
   await blacklistedToken.save();
+  //check other tokens in blacklist and remove expired ones
+  const blacklistedTokens = await BlacklistedToken.find();
+  blacklistedTokens.forEach(async (token) => {
+    if (token.expires < Date.now()) {
+      await BlacklistedToken.findByIdAndDelete(token._id);
+    }
+  });
   res.status(200).send({ message: "Logged out successfully" });
 });
 

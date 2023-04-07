@@ -1,34 +1,14 @@
 const express = require("express");
-const router = express.Router();
-const auth = require("../middleware/auth");
-const multer = require("multer");
-const csvtojson = require("csvtojson");
-const generator = require("generate-password");
-const {
-  sendWelcomeEmailWithPasswordToStudent,
-  sendWelcomeEmailWithPasswordToFaculty,
-} = require("../utils/mailConfig");
-const storage = multer.memoryStorage();
-const upload = multer({
-  storage: storage,
-  fileFilter: function (req, file, cb) {
-    // Accept only csv files
-    if (!file.originalname.match(/\.(csv)$/)) {
-      return cb(new Error("Please upload a CSV file."));
-    }
-    cb(null, true);
-  },
-});
 
 const Student = require("../models/student");
 const Faculty = require("../models/faculty");
 const Admin = require("../models/admin");
+const {
+  sendWelcomeEmailWithPasswordToStudent,
+} = require("../utils/mailConfig");
 const { generateRandomPassword } = require("../utils/helperFuntions");
 
-// @route   GET api/admin
-// @desc    Get all users
-// @access  Private
-router.get("/", auth, async (req, res) => {
+exports.getAllUsers = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
     const students = await Student.find();
@@ -44,18 +24,14 @@ router.get("/", auth, async (req, res) => {
     console.error(err.message);
     res.status(500).send(err.message);
   }
-});
+};
 
-// @route   POST api/admin/add-students
-// @desc    Add students using csv file
-// @access  Private
-router.post("/add-students", auth, upload.single("file"), async (req, res) => {
+exports.addStudentsUsingCsv = async (req, res) => {
   try {
     if (!req.file) return res.status(400).send("Please upload a file.");
     if (!req.file.originalname.match(/\.(csv)$/))
       return res.status(400).send("Please upload a CSV file.");
-    if (req.user.role !== "admin")
-      return res.status(401).json({ message: "Unauthorized" });
+    if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
     // Convert CSV buffer to JSON
     const students = await csvtojson({
       // ignore first row
@@ -86,10 +62,10 @@ router.post("/add-students", auth, upload.single("file"), async (req, res) => {
       (email, index) => emails.indexOf(email) !== index
     );
     if (duplicateEnrollmentNumbers.length > 0) {
-      return res.status(400).json({ message: "Duplicate enrollment numbers" });
+      return res.status(400).send("Duplicate enrollment numbers");
     }
     if (duplicateEmails.length > 0) {
-      return res.status(400).json({ message: "Duplicate emails" });
+      return res.status(400).send("Duplicate emails");
     }
     //check if any of the students already exist
     const existingStudents = await Student.find({
@@ -125,12 +101,9 @@ router.post("/add-students", auth, upload.single("file"), async (req, res) => {
     // Delete the uploaded file
     if (req.file) req.file.buffer = null;
   }
-});
+};
 
-// @route   POST api/admin/add-faculties
-// @desc    Add faculties using csv file
-// @access  Private
-router.post("/add-faculties", auth, upload.single("file"), async (req, res) => {
+exports.addFacultiesUsingCsv = async (req, res) => {
   try {
     if (!req.file) return res.status(400).send("Please upload a file.");
     if (!req.file.originalname.match(/\.(csv)$/))
@@ -174,9 +147,9 @@ router.post("/add-faculties", auth, upload.single("file"), async (req, res) => {
     //send email to all the faculties
     try {
       userObjects.forEach(async (user) => {
-        await sendWelcomeEmailWithPasswordToFaculty(
-          user.email,
+        await sendWelcomeEmailWithPasswordToStudent(
           user.name,
+          user.email,
           user.password
         );
       });
@@ -195,12 +168,9 @@ router.post("/add-faculties", auth, upload.single("file"), async (req, res) => {
       req.file.buffer = null;
     }
   }
-});
+};
 
-// @route   POST api/admin/add-student
-// @desc    Add single student
-// @access  Private
-router.post("/add-student", auth, async (req, res) => {
+exports.addStudent = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
     const { email, name, enrollment_number, department } = req.body;
@@ -229,12 +199,9 @@ router.post("/add-student", auth, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-});
+};
 
-// @route   POST api/admin/add-faculty
-// @desc    Add single faculty
-// @access  Private
-router.post("/add-faculty", auth, async (req, res) => {
+exports.addFaculty = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
     const { email, name, department, phoneNumber } = req.body;
@@ -250,10 +217,10 @@ router.post("/add-faculty", auth, async (req, res) => {
     const result = await faculty.save();
     // Send welcome email to the new faculty
     try {
-      await sendWelcomeEmailWithPasswordToFaculty(
+      await sendWelcomeEmailWithPasswordToStudent(
         email,
         name,
-        faculty.password
+        generateRandomPassword()
       );
     } catch (error) {
       console.error(error);
@@ -265,12 +232,9 @@ router.post("/add-faculty", auth, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-});
+};
 
-// @route   DELETE api/admin/delete-student/:id
-// @desc    delete student
-// @access  Private
-router.delete("/delete-student/:id", auth, async (req, res) => {
+exports.deleteStudentById = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
     let student = await Student.findById(req.params.id);
@@ -281,12 +245,9 @@ router.delete("/delete-student/:id", auth, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-});
+};
 
-// @route   DELETE api/admin/delete-faculty/:id
-// @desc    Remove faculty
-// @access  Private
-router.delete("/delete-faculty/:id", auth, async (req, res) => {
+exports.deleteFacultyById = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
     let faculty = await Faculty.findById(req.params.id);
@@ -297,12 +258,9 @@ router.delete("/delete-faculty/:id", auth, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-});
+};
 
-// @route   GET api/admin/students
-// @desc    Get all students
-// @access  Private
-router.get("/students", auth, async (req, res) => {
+exports.getStudents = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
     const students = await Student.find();
@@ -311,12 +269,9 @@ router.get("/students", auth, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-});
+};
 
-// @route   GET api/admin/faculties
-// @desc    Get all faculties
-// @access  Private
-router.get("/faculties", auth, async (req, res) => {
+exports.getFaculties = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
     const faculties = await Faculty.find();
@@ -325,12 +280,9 @@ router.get("/faculties", auth, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-});
+};
 
-// @route   GET api/admin/get-student/:id
-// @desc    Get student by id
-// @access  Private
-router.get("/get-student/:id", auth, async (req, res) => {
+exports.getStudentById = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
     const student = await Student.findById(req.params.id);
@@ -340,12 +292,9 @@ router.get("/get-student/:id", auth, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-});
+};
 
-// @route   GET api/admin/get-faculty/:id
-// @desc    Get faculty by id
-// @access  Private
-router.get("/get-faculty/:id", auth, async (req, res) => {
+exports.getFacultyById = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
     const faculty = await Faculty.findById(req.params.id);
@@ -355,111 +304,45 @@ router.get("/get-faculty/:id", auth, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-});
+};
 
-// @route   PUT api/admin/update-student/:id
-// @desc    Update student
-// @access  Private
-router.put("/update-student/:id", auth, async (req, res) => {
+exports.updateStudentById = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
-    const { email, name, enrollment_number, department } = req.body;
     const student = await Student.findById(req.params.id);
     if (!student) return res.status(404).json({ message: "Student not found" });
+    const { email, name, enrollment_number, department } = req.body;
     student.email = email;
     student.name = name;
     student.enrollment_number = enrollment_number;
     student.department = department;
-    await student.save();
-    // sent student data and message
-    const message = "Student updated";
-    res.status(200).json(student, message);
+    const result = await student.save();
+    res.status(200).json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-});
+};
 
-// @route   PUT api/admin/update-faculty/:id
-// @desc    Update faculty
-// @access  Private
-router.put("/update-faculty/:id", auth, async (req, res) => {
+exports.updateFacultyById = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
-    const { email, name, department } = req.body;
     const faculty = await Faculty.findById(req.params.id);
     if (!faculty) return res.status(404).json({ message: "Faculty not found" });
+    const { email, name, department, phoneNumber } = req.body;
     faculty.email = email;
     faculty.name = name;
     faculty.department = department;
-    await faculty.save();
-    // sent faculty data and message
-    const message = "Faculty updated";
-    res.status(200).json(faculty, message);
+    faculty.phoneNumber = phoneNumber;
+    const result = await faculty.save();
+    res.status(200).json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-});
+};
 
-// @route   GET api/admin/get-student-by-enrollment/:enrollment_number
-// @desc    Get student by enrollment number
-// @access  Private
-router.get(
-  "/get-student-by-enrollment/:enrollment_number",
-  auth,
-  async (req, res) => {
-    try {
-      if (req.user.role !== "admin")
-        return res.status(401).send("Unauthorized");
-      const enrollment_number = req.params.enrollment_number;
-      const student = await Student.findOne({ enrollment_number });
-      if (!student)
-        return res.status(404).json({ message: "Student not found" });
-      res.status(200).json(student);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: error.message });
-    }
-  }
-);
-
-// @route   GET api/admin/get-faculty-by-email/:email
-// @desc    Get faculty by email
-// @access  Private
-router.get("/get-faculty-by-email/:email", auth, async (req, res) => {
-  try {
-    if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
-    const email = req.params.email;
-    const faculty = await Faculty.findOne({ email });
-    if (!faculty) return res.status(404).json({ message: "Faculty not found" });
-    res.status(200).json(faculty);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// @route   GET api/admin/get-student-by-email/:email
-// @desc    Get student by email
-// @access  Private
-router.get("/get-student-by-email/:email", auth, async (req, res) => {
-  try {
-    if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
-    const email = req.params.email;
-    const student = await Student.findOne({ email });
-    if (!student) return res.status(404).json({ message: "Student not found" });
-    res.status(200).json(student);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// @route   GET api/admin/reset-student-password/:id
-// @desc    Reset student password
-// @access  Private
-router.get("/reset-student-password/:id", auth, async (req, res) => {
+exports.resestStudentPassword = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
     const student = await Student.findById(req.params.id);
@@ -471,43 +354,4 @@ router.get("/reset-student-password/:id", auth, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-});
-
-// @route   GET api/admin/reset-faculty-password/:id
-// @desc    Reset faculty password
-// @access  Private
-router.get("/reset-faculty-password/:id", auth, async (req, res) => {
-  try {
-    if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
-    const faculty = await Faculty.findById(req.params.id);
-    if (!faculty) return res.status(404).json({ message: "Faculty not found" });
-    faculty.password = process.env.DEFAULT_PASSWORD;
-    await faculty.save();
-    res.status(200).json({ message: "Password reset successful" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
-//get all users on the dashboard
-// @route   GET api/admin/dashboard
-// @desc    Get all users, admins, students and faculties
-// @access  Private
-router.get("/dashboard", auth, async (req, res) => {
-  try {
-    if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
-    const admins = await Admin.find();
-    const students = await Student.find();
-    const faculties = await Faculty.find();
-    const dashboard = {};
-    dashboard.admins = admins;
-    dashboard.students = students;
-    dashboard.faculties = faculties;
-    res.status(200).json(dashboard);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
-  }
-});
-module.exports = router;
+};
