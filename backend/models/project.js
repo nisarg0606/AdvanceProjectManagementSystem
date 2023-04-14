@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const Board = require("./board");
 const CommentSchema = new mongoose.Schema({
   text: {
     type: String,
@@ -87,6 +87,11 @@ const ProjectSchema = new mongoose.Schema({
     type: Number,
     default: 4,
   },
+  board: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Board",
+    default: null,
+  },
   repository_link: {
     type: String,
     default: "",
@@ -124,6 +129,22 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     default: "MongoDB",
   },
+});
+
+ProjectSchema.post("save", function (doc, next) {
+  const newBoard = new Board({
+    name: "Default Board",
+    description: "Default board for the project",
+    project: doc._id,
+  });
+  newBoard.save(function (err, boardDoc) {
+    if (err) {
+      return next(err);
+    }
+    // Add the board document's _id to the project's boards array
+    doc.board.push(boardDoc._id);
+    doc.save(next);
+  });
 });
 
 module.exports = mongoose.model("Project", ProjectSchema);

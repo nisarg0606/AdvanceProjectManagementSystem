@@ -152,7 +152,7 @@ router.get("/requests", auth, async (req, res) => {
     res.status(200).json(requests);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server Error");
+    res.status(500).send("Server Error: ---> "+ err.message);
   }
 });
 
@@ -215,7 +215,7 @@ router.get("/dashboard", auth, async (req, res) => {
     res.status(200).json(dashboard);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server Error");
+    res.status(500).send("Server Error: ---> "+ err.message);
   }
 });
 
@@ -295,7 +295,7 @@ router.get("/groups", auth, async (req, res) => {
     res.status(200).json(groupsjson);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server Error");
+    res.status(500).send("Server Error: ---> "+ err.message);
   }
 });
 
@@ -334,7 +334,7 @@ router.delete(
       res.status(200).json({ msg: "Student removed from group" });
     } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).send("Server Error: ---> "+ err.message);
     }
   }
 );
