@@ -167,25 +167,51 @@ router.get("/dashboard", auth, async (req, res) => {
       return res.status(404).json({ msg: "Faculty not found" });
     }
     const dashboard = {};
-    // get total accepted projects
-    const acceptedProjects = await Project.find({
-      faculty: req.user._id,
-      isApproved: true,
-    });
-    dashboard.totalAcceptedProjects = acceptedProjects.length;
-    // get total requests
-    const requests = await Project.find({
-      faculty: req.user._id,
-      isApproved: false,
-      status: "active",
-    });
-    dashboard.totalRequests = requests.length;
-    // get total students from accepted projects
-    let totalStudents = 0;
-    for (let i = 0; i < acceptedProjects.length; i++) {
-      totalStudents += acceptedProjects[i].students.length;
+    if (req.headers.semester) {
+      const semester = req.headers.semester;
+      // get total projects in current semester
+      const currentSemesterProjects = await Project.find({
+        faculty: req.user._id,
+        isApproved: true,
+        semester: semester,
+      });
+      dashboard.totalAcceptedProjects = currentSemesterProjects.length;
+      // get total requests in current semester
+      const currentSemesterRequests = await Project.find({
+        faculty: req.user._id,
+        isApproved: false,
+        status: "active",
+        semester: semester,
+      });
+      dashboard.totalRequests = currentSemesterRequests.length;
+      // get total students from accepted projects in current semester
+      let currentSemesterTotalStudents = 0;
+      for (let i = 0; i < currentSemesterProjects.length; i++) {
+        currentSemesterTotalStudents +=
+          currentSemesterProjects[i].students.length;
+      }
+      dashboard.totalStudents = currentSemesterTotalStudents;
+    } else {
+      // get total accepted projects
+      const acceptedProjects = await Project.find({
+        faculty: req.user._id,
+        isApproved: true,
+      });
+      dashboard.totalAcceptedProjects = acceptedProjects.length;
+      // get total requests
+      const requests = await Project.find({
+        faculty: req.user._id,
+        isApproved: false,
+        status: "active",
+      });
+      dashboard.totalRequests = requests.length;
+      // get total students from accepted projects
+      let totalStudents = 0;
+      for (let i = 0; i < acceptedProjects.length; i++) {
+        totalStudents += acceptedProjects[i].students.length;
+      }
+      dashboard.totalStudents = totalStudents;
     }
-    dashboard.totalStudents = totalStudents;
     res.status(200).json(dashboard);
   } catch (err) {
     console.error(err.message);
@@ -207,11 +233,21 @@ router.get("/groups", auth, async (req, res) => {
     if (!faculty) {
       return res.status(404).json({ msg: "Faculty not found" });
     }
-    let groups = await Project.find({
-      faculty: req.user._id,
-      isApproved: true,
-      status: "active",
-    });
+    let groups = [];
+    if (req.headers.semester) {
+      groups = await Project.find({
+        faculty: req.user._id,
+        isApproved: true,
+        status: "active",
+        semester: req.headers.semester,
+      });
+    } else {
+      groups = await Project.find({
+        faculty: req.user._id,
+        isApproved: true,
+        status: "active",
+      });
+    }
     const groupsData = [];
     for (let i = 0; i < groups.length; i++) {
       let group = groups[i].toObject();
@@ -262,7 +298,6 @@ router.get("/groups", auth, async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
-
 
 // @route   DELETE api/faculty/removeStudentFromGroup/:id/:studentId
 // @desc    Remove student from group
