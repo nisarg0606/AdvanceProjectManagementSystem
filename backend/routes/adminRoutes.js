@@ -169,7 +169,7 @@ router.post("/add-faculties", auth, upload.single("file"), async (req, res) => {
       email: { $in: userObjects.map((user) => user.email) },
     });
     if (existingFaculties.length > 0) {
-      return res.status(400).send("Some faculties already exist");
+      return res.status(400).json({ message: "Some faculties already exist", existingFaculties });
     }
     //send email to all the faculties
     try {
@@ -396,7 +396,8 @@ router.put("/update-faculty/:id", auth, async (req, res) => {
     await faculty.save();
     // sent faculty data and message
     const message = "Faculty updated";
-    res.status(200).json(faculty, message);
+    let result = { faculty, message };
+    res.status(200).json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
