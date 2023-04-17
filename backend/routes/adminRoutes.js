@@ -387,12 +387,13 @@ router.put("/update-student/:id", auth, async (req, res) => {
 router.put("/update-faculty/:id", auth, async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(401).send("Unauthorized");
-    const { email, name, department } = req.body;
+    const { email, name, department, designation } = req.body;
     const faculty = await Faculty.findById(req.params.id);
     if (!faculty) return res.status(404).json({ message: "Faculty not found" });
     faculty.email = email;
     faculty.name = name;
     faculty.department = department;
+    faculty.designation = designation;
     await faculty.save();
     // sent faculty data and message
     const message = "Faculty updated";
