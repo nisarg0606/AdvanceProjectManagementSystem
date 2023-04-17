@@ -373,7 +373,8 @@ router.put("/update-student/:id", auth, async (req, res) => {
     await student.save();
     // sent student data and message
     const message = "Student updated";
-    res.status(200).json(student, message);
+    let result = { student, message };
+    res.status(200).json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
@@ -395,7 +396,8 @@ router.put("/update-faculty/:id", auth, async (req, res) => {
     await faculty.save();
     // sent faculty data and message
     const message = "Faculty updated";
-    res.status(200).json(faculty, message);
+    let result = { faculty, message };
+    res.status(200).json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
