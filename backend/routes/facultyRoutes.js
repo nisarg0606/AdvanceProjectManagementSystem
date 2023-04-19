@@ -171,7 +171,8 @@ router.get("/dashboard", auth, async (req, res) => {
     const acceptedProjects = await Project.find({
       faculty: req.user._id,
       isApproved: true,
-    });
+    }).populate({path: "leader", select: "name -_id"}).populate({path: "students", select: "name -_id"}).exec(); 
+    console.log(acceptedProjects + "-------> acceptedProjects");
     dashboard.totalAcceptedProjects = acceptedProjects.length;
     // get total requests
     const requests = await Project.find({
@@ -179,6 +180,7 @@ router.get("/dashboard", auth, async (req, res) => {
       isApproved: false,
       status: "active",
     });
+    console.log(requests + "-------> requests From Faculty Dashboard");
     dashboard.totalRequests = requests.length;
     // get total students from accepted projects
     let totalStudents = 0;
@@ -186,6 +188,37 @@ router.get("/dashboard", auth, async (req, res) => {
       totalStudents += acceptedProjects[i].students.length;
     }
     dashboard.totalStudents = totalStudents;
+    // create list of projects semester wise
+    let semester_6 = [];
+    let semester_7 = [];
+    let semester_8 = [];
+    for (let i = 0; i < acceptedProjects.length; i++) {
+      if (acceptedProjects[i].semester === "6") {
+        semester_6.push(acceptedProjects[i]);
+      } else if (acceptedProjects[i].semester === "7") {
+        semester_7.push(acceptedProjects[i]);
+      } else if (acceptedProjects[i].semester === "8") {
+        semester_8.push(acceptedProjects[i]);
+      }
+    }
+    dashboard.semester_6 = semester_6;
+    dashboard.semester_7 = semester_7;
+    dashboard.semester_8 = semester_8;
+    let semester_6_Requests = [];
+    let semester_7_Requests = [];
+    let semester_8_Requests = [];
+    for (let i = 0; i < requests.length; i++) {
+      if (requests[i].semester === "6") {
+        semester_6_Requests.push(requests[i]);
+      } else if (requests[i].semester === "7") {
+        semester_7_Requests.push(requests[i]);
+      } else if (requests[i].semester === "8") {
+        semester_8_Requests.push(requests[i]);
+      }
+    }
+    dashboard.semester_6_Requests = semester_6_Requests;
+    dashboard.semester_7_Requests = semester_7_Requests;
+    dashboard.semester_8_Requests = semester_8_Requests;
     res.status(200).json(dashboard);
   } catch (err) {
     console.error(err.message);
@@ -256,13 +289,26 @@ router.get("/groups", auth, async (req, res) => {
       //set group name as key and group data as array
       groupsjson["Group" + (i + 1)] = groupsData[i];
     }
-    res.status(200).json(groupsjson);
+    //take semester as key and group data as array
+    const groupsjsonSemester = {};
+    for (let i = 0; i < groupsData.length; i++) {
+      //set semester as key and group data as array
+      if (groupsjsonSemester[groupsData[i].semester]) {
+        groupsjsonSemester[groupsData[i].semester].push(groupsData[i]);
+      } else {
+        groupsjsonSemester[groupsData[i].semester] = [groupsData[i]];
+      }
+    }
+    let result = {
+      groups: groupsjson,
+      groupsSemester: groupsjsonSemester,
+    };
+    res.status(200).json(result);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
   }
 });
-
 
 // @route   DELETE api/faculty/removeStudentFromGroup/:id/:studentId
 // @desc    Remove student from group
@@ -286,6 +332,14 @@ router.delete(
       const project = await Project.findById(id);
       if (!project) {
         return res.status(404).json({ msg: "Project not found" });
+      }
+      // check if faculty is owner of project
+      if (project.faculty.toString() !== req.user._id) {
+        return res.status(401).json({ msg: "Not authorized" });
+      }
+      //check if student is leader
+      if (project.leader.toString() === studentId) {
+        return res.status(404).json({ msg: "Student is leader" });
       }
       //check if student is in group
       const studentIndex = project.students.indexOf(studentId);

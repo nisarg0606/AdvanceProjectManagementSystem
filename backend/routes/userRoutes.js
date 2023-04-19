@@ -64,7 +64,7 @@ router.post("/login", async (req, res) => {
     if (!user) return res.status(401).send({ error: "you are not registered" });
     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!isMatch) return res.status(401).send({ error: "Invalid password}" });
+    if (!isMatch) return res.status(401).send({ error: "Invalid password" });
 
     // add token to user data
 
@@ -137,7 +137,7 @@ router.post("/change-password", async (req, res) => {
       } else {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch)
-          return res.status(401).send({ error: "Invalid password}" });
+          return res.status(401).send({ error: "Invalid password" });
         const salt = await bcrypt.genSalt(12);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
         user.password = hashedPassword;
