@@ -81,7 +81,6 @@ router.get("/", auth, async (req, res) => {
         model: "List",
         populate: {
           path: "cards",
-          select: "name description",
           model: "Card",
         },
       })
