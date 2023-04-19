@@ -7,6 +7,9 @@ const { body, validationResult, check } = require("express-validator");
 const Project = require("../models/project");
 const Faculty = require("../models/faculty");
 const Student = require("../models/student");
+const Board = require("../models/board");
+const List = require("../models/list");
+const Card = require("../models/card");
 const {
   uniqueNamesGenerator,
   colors,

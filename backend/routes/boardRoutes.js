@@ -52,6 +52,12 @@ router.post("/", auth, async (req, res) => {
     board.lists.push(list4._id);
     await board.save();
 
+    // push board id to project
+    const project = await Project.findById(req.user.project_id);
+    if (!project) {
+      return res.status(404).json({ msg: "Project not found" });
+    }
+    project.board = board._id;
     res.status(200).json(board);
   } catch (err) {
     console.error(err.message);
