@@ -16,6 +16,7 @@ router.post("/", auth, async (req, res) => {
     const board = new Board({
       name,
       description,
+      project: req.user.project_id,
     });
     await board.save();
     // const project = await Project.findById(req.user.project_id);
