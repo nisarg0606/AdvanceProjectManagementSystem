@@ -152,6 +152,33 @@ router.post(
         faculty.projects.push(project._id);
         await faculty.save();
       }
+
+      //create a new board
+      const newBoard = new Board({
+        project: project._id,
+        list: [
+          {
+            title: "To Do",
+            cards: [],
+          },
+          {
+            title: "In Progress",
+            cards: [],
+          },
+          {
+            title: "In Review",
+            cards: [],
+          },
+          {
+            title: "Done",
+            cards: [],
+          },
+        ],
+      });
+      await newBoard.save();
+
+      //push board._id to project
+      project.board = newBoard._id;
       res.status(200).json(project);
     } catch (err) {
       console.error(err.message);
