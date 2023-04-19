@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 const Board = require("../models/board");
 const Project = require("../models/project");
+const List = require("../models/list");
 
 // @route   POST api/board
 // @desc    Create a board
@@ -25,6 +26,27 @@ router.post("/", auth, async (req, res) => {
     // }
     // project.board_id = board._id;
     // await project.save();
+    //create predfined lists
+    const list1 = new List({
+        name: "To Do",
+        board: board._id,
+    });
+    const list2 = new List({
+        name: "In Progress",
+        board: board._id,
+    });
+    const list3 = new List({
+        name: "In Review",
+        board: board._id,
+    });
+    const list4 = new List({
+        name: "Done",
+        board: board._id,
+    });
+    await list1.save();
+    await list2.save();
+    await list3.save();
+    await list4.save();
     res.status(200).json(board);
   } catch (err) {
     console.error(err.message);
