@@ -26,7 +26,8 @@ router.get("/dashboard", auth, async (req, res) => {
       const comments = project.comments;
       const message =
         "Please delete this project by clicking the delete button here and create a new one";
-      return res.status(205).json({ message, comments });
+      const result = { message, comments };
+      return res.status(205).json(result);
     }
     // get leader name and email
     const leader = await Student.findOne({ _id: leaderId }).select(
@@ -55,7 +56,7 @@ router.get("/dashboard", auth, async (req, res) => {
     const facultyName = faculty.name;
     const facultyEmail = faculty.email;
     const facultyPhone = faculty.phoneNumber;
-    res.status(200).json({
+    const result = {
       projectId,
       projectTitle,
       projectDescription,
@@ -72,7 +73,8 @@ router.get("/dashboard", auth, async (req, res) => {
       leaderEmail,
       groupMembers,
       totalMembers,
-    });
+    }
+    res.status(200).json(result);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error --> " + err.message);
