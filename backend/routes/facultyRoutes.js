@@ -5,6 +5,8 @@ const Student = require("../models/student");
 const Faculty = require("../models/faculty");
 const Admin = require("../models/admin");
 const Project = require("../models/project");
+const Board = require("../models/board");
+
 const auth = require("../middleware/auth");
 const { count } = require("../models/student");
 
@@ -346,5 +348,47 @@ router.delete(
     }
   }
 );
+
+//@route GET api/faculty/board/:project_id
+//@desc Get Board of a project
+//@access Private
+router.get("/board/:project_id", auth, async (req, res) => {
+  try {
+    // if role is not faculty then return error
+    if (req.user.role !== "faculty") {
+      return res.status(401).json({ msg: "Not authorized" });
+    }
+    // get project id from params
+    const { project_id } = req.params;
+    //find project
+    const project = await Project.findById(project_id);
+    if (!project) {
+      return res.status(404).json({ msg: "Project not found" });
+    }
+    // check if faculty is owner of project
+    if (project.faculty.toString() !== req.user._id) {
+      return res.status(401).json({ msg: "Not authorized" });
+    }
+    //get board
+    const board = await Board.findOne({ project: project._id })
+      .populate({
+        path: "lists",
+        select: "name cards",
+        model: "List",
+        populate: {
+          path: "cards",
+          model: "Card",
+        },
+      })
+      .exec();
+    if (!board) {
+      return res.status(404).json({ msg: "Board not found" });
+    }
+    res.status(200).json(board);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
 
 module.exports = router;
