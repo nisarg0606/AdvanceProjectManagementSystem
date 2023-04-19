@@ -110,3 +110,5 @@ router.delete("/:id", auth, async (req, res) => {
     res.status(500).send("Server Error --> " + err.message);
   }
 });
+
+module.exports = router;
