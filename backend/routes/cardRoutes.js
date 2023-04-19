@@ -4,7 +4,7 @@ const auth = require("../middleware/auth");
 const List = require("../models/list");
 const Card = require("../models/card");
 
-// @route   POST api/card
+// @route   POST api/card/:id
 // @desc    Create a card
 // @access  Private
 router.post("/:id", auth, async (req, res) => {
@@ -12,16 +12,16 @@ router.post("/:id", auth, async (req, res) => {
     if (req.user.role !== "student") {
       return res.status(401).json({ msg: "Not authorized" });
     }
-    const { name, description, assignedTo, dueDate } = req.body;
-    if (!name) {
-      return res.status(400).json({ msg: "Name is required" });
+    const { title, description, assignedTo, dueDate } = req.body;
+    if (!title) {
+      return res.status(400).json({ msg: "title is required" });
     }
     const list = await List.findById(req.params.id);
     if (!list) {
       return res.status(404).json({ msg: "List not found" });
     }
     const card = new Card({
-      name,
+      title,
       description,
       list: req.params.id,
       assignedTo,

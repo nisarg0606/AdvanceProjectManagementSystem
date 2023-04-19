@@ -19,7 +19,6 @@ router.post("/", auth, async (req, res) => {
       description,
       project: req.user.project_id,
     });
-    await board.save();
     // const project = await Project.findById(req.user.project_id);
     // if (!project) {
     //   return res.status(404).json({ msg: "Project not found" });
@@ -28,25 +27,31 @@ router.post("/", auth, async (req, res) => {
     // await project.save();
     //create predfined lists
     const list1 = new List({
-        name: "To Do",
-        board: board._id,
+      name: "To Do",
+      board: board._id,
     });
     const list2 = new List({
-        name: "In Progress",
-        board: board._id,
+      name: "In Progress",
+      board: board._id,
     });
     const list3 = new List({
-        name: "In Review",
-        board: board._id,
+      name: "In Review",
+      board: board._id,
     });
     const list4 = new List({
-        name: "Done",
-        board: board._id,
+      name: "Done",
+      board: board._id,
     });
     await list1.save();
     await list2.save();
     await list3.save();
     await list4.save();
+    board.lists.push(list1._id);
+    board.lists.push(list2._id);
+    board.lists.push(list3._id);
+    board.lists.push(list4._id);
+    await board.save();
+
     res.status(200).json(board);
   } catch (err) {
     console.error(err.message);
@@ -57,7 +62,7 @@ router.post("/", auth, async (req, res) => {
 // @route   GET api/board using project id
 // @desc    Get board of a project
 // @access  Private
-router.get("/:id", auth, async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
     if (req.user.role !== "student" && req.user.role !== "faculty") {
       return res.status(401).json({ msg: "Not authorized" });
@@ -68,8 +73,19 @@ router.get("/:id", auth, async (req, res) => {
     if (!project) {
       return res.status(404).json({ msg: "Project not found" });
     }
-    //find board using project id passed in url
-    const board = await Board.findOne({ project: req.params.id });
+    //find board using project id and populate it with array of lists and cards
+    const board = await Board.findOne({ project: project._id })
+      .populate({
+        path: "lists",
+        select: "name cards",
+        model: "List",
+        populate: {
+          path: "cards",
+          select: "name description",
+          model: "Card",
+        },
+      })
+      .exec();
     if (!board) {
       return res.status(404).json({ msg: "Board not found" });
     }
