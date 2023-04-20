@@ -47,7 +47,7 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     required: true,
     //sem 6, 7 or 8
-    default: "Semester" + Math.floor(Math.random() * 3 + 6),
+    // default: "Semester" + Math.floor(Math.random() * 3 + 6),
   },
   title: {
     type: String,

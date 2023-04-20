@@ -102,6 +102,7 @@ router.post(
     const {
       title,
       description,
+      semester,
       faculty_id,
       project_type,
       frontendTechnologies,
@@ -129,6 +130,7 @@ router.post(
         description,
         leader: req.user._id,
         faculty: faculty_id,
+        semester,
         //push user._id to student array
         students: [req.user._id],
         invite_code: generateInviteCode(),
