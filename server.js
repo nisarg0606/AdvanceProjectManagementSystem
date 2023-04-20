@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const dotenv = require("dotenv");
+const dotenv = require("dotenv").config({ path: ".env" });
 const path = require("path");
 const ejs = require("ejs");
 
@@ -11,8 +11,6 @@ app.set("view engine", "ejs");
 
 // Set the views directory
 app.set("views", path.join(__dirname, "views"));
-
-dotenv.config({ path: "../.env" }); 
 
 const PORT = process.env.PORT || 5000;
 
@@ -24,7 +22,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Connect to MongoDB
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+  })
   .then(() => {
     console.log("MongoDB connected");
   })
