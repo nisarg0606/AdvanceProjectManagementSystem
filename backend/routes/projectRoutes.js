@@ -183,7 +183,7 @@ router.post(
       });
       const board = await newBoard.save();
       //push board._id to project
-      project.board = newBoard._id;
+      project.board = board._id;
       res.status(200).json(project);
     } catch (err) {
       console.error(err.message);
