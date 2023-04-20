@@ -155,35 +155,36 @@ router.post(
         faculty.projects.push(project._id);
         await faculty.save();
       }
+      const newBoard = new Board({
+        project: project._id,
+      });
       const list1 = new List({
         name: "To Do",
-        board: board._id,
+        board: newBoard._id,
       });
       const list2 = new List({
         name: "In Progress",
-        board: board._id,
+        board: newBoard._id,
       });
       const list3 = new List({
         name: "In Review",
-        board: board._id,
+        board: newBoard._id,
       });
       const list4 = new List({
         name: "Done",
-        board: board._id,
+        board: newBoard._id,
       });
       await list1.save();
       await list2.save();
       await list3.save();
       await list4.save();
-
-      //create a new board
-      const newBoard = new Board({
-        project: project._id,
-        lists: [list1._id, list2._id, list3._id, list4._id],
-      });
-      const board = await newBoard.save();
+      newBoard.lists.push(list1._id);
+      newBoard.lists.push(list2._id);
+      newBoard.lists.push(list3._id);
+      newBoard.lists.push(list4._id);
+      await newBoard.save();
       //push board._id to project
-      project.board = board._id;
+      project.board = newBoard._id;
       res.status(200).json(project);
     } catch (err) {
       console.error(err.message);
@@ -312,7 +313,7 @@ router.delete("/:id", auth, async (req, res) => {
       await faculty.save();
     }
 
-    await project.remove();
+    await project.deleteOne({ _id: req.params.id });
     res.status(200).json({ msg: "Project removed" });
   } catch (err) {
     console.error(err.message);
