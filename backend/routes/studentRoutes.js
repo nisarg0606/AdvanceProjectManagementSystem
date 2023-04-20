@@ -72,7 +72,7 @@ router.get("/dashboard", auth, async (req, res) => {
       leaderEmail,
       groupMembers,
       totalMembers,
-    }
+    });
     res.status(200).json(result);
   } catch (err) {
     console.error(err.message);
