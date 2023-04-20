@@ -173,4 +173,61 @@ router.post("/move", auth, async (req, res) => {
   }
 });
 
+// @route  POST api/card/:id/comment
+// @desc   Add a comment to a card
+// @access Private
+router.post("/:id/comment", auth, async (req, res) => {
+  try {
+    if (req.user.role !== "student" && req.user.role !== "faculty") {
+      return res.status(401).json({ msg: "Not authorized" });
+    }
+    const card = await Card.findById(req.params.id);
+    if (!card) {
+      return res.status(404).json({ msg: "Card not found" });
+    }
+    const comment = {
+      user: req.user._id,
+      text: req.body.text,
+    };
+    card.comments.push(comment);
+    await card.save();
+    res.status(200).json(card);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error --> " + err.message);
+  }
+});
+
+// @route  DELETE api/card/:id/comment/:comment_id
+// @desc   Delete a comment from a card
+// @access Private
+router.delete("/:id/comment/:comment_id", auth, async (req, res) => {
+  try {
+    if (req.user.role !== "student" && req.user.role !== "faculty") {
+      return res.status(401).json({ msg: "Not authorized" });
+    }
+    const card = await Card.findById(req.params.id);
+    if (!card) {
+      return res.status(404).json({ msg: "Card not found" });
+    }
+    const comment = card.comments.find(
+      (comment) => comment.id === req.params.comment_id
+    );
+    if (!comment) {
+      return res.status(404).json({ msg: "Comment not found" });
+    }
+    if (comment.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ msg: "Not authorized" });
+    }
+    card.comments = card.comments.filter(
+      (comment) => comment.id !== req.params.comment_id
+    );
+    await card.save();
+    res.status(200).json(card);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error --> " + err.message);
+  }
+});
+
 module.exports = router;
