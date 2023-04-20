@@ -42,6 +42,7 @@ const ProjectSchema = new mongoose.Schema({
     default: null,
     required: false,
   },
+
   semester: {
     type: String,
     required: true,

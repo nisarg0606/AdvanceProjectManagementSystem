@@ -55,7 +55,7 @@ router.get("/dashboard", auth, async (req, res) => {
     const facultyName = faculty.name;
     const facultyEmail = faculty.email;
     const facultyPhone = faculty.phoneNumber;
-    const result = {
+    res.status(200).json({
       projectId,
       projectTitle,
       projectDescription,
