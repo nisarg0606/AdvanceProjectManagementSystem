@@ -36,6 +36,13 @@ const ProjectSchema = new mongoose.Schema({
     unique: true,
     default: "Group" + Math.floor(Math.random() * 10000),
   },
+  board: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Board",
+    default: null,
+    required: false,
+  },
+
   semester: {
     type: String,
     required: true,

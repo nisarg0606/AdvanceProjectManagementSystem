@@ -5,6 +5,8 @@ const Student = require("../models/student");
 const Faculty = require("../models/faculty");
 const Admin = require("../models/admin");
 const Project = require("../models/project");
+const Board = require("../models/board");
+
 const auth = require("../middleware/auth");
 const { count } = require("../models/student");
 
@@ -167,29 +169,55 @@ router.get("/dashboard", auth, async (req, res) => {
       return res.status(404).json({ msg: "Faculty not found" });
     }
     const dashboard = {};
-    // get total accepted projects
-    const acceptedProjects = await Project.find({
-      faculty: req.user._id,
-      isApproved: true,
-    });
-    dashboard.totalAcceptedProjects = acceptedProjects.length;
-    // get total requests
-    const requests = await Project.find({
-      faculty: req.user._id,
-      isApproved: false,
-      status: "active",
-    });
-    dashboard.totalRequests = requests.length;
-    // get total students from accepted projects
-    let totalStudents = 0;
-    for (let i = 0; i < acceptedProjects.length; i++) {
-      totalStudents += acceptedProjects[i].students.length;
+    if (req.headers.semester) {
+      const semester = req.headers.semester;
+      // get total projects in current semester
+      const currentSemesterProjects = await Project.find({
+        faculty: req.user._id,
+        isApproved: true,
+        semester: semester,
+      });
+      dashboard.totalAcceptedProjects = currentSemesterProjects.length;
+      // get total requests in current semester
+      const currentSemesterRequests = await Project.find({
+        faculty: req.user._id,
+        isApproved: false,
+        status: "active",
+        semester: semester,
+      });
+      dashboard.totalRequests = currentSemesterRequests.length;
+      // get total students from accepted projects in current semester
+      let currentSemesterTotalStudents = 0;
+      for (let i = 0; i < currentSemesterProjects.length; i++) {
+        currentSemesterTotalStudents +=
+          currentSemesterProjects[i].students.length;
+      }
+      dashboard.totalStudents = currentSemesterTotalStudents;
+    } else {
+      // get total accepted projects
+      const acceptedProjects = await Project.find({
+        faculty: req.user._id,
+        isApproved: true,
+      });
+      dashboard.totalAcceptedProjects = acceptedProjects.length;
+      // get total requests
+      const requests = await Project.find({
+        faculty: req.user._id,
+        isApproved: false,
+        status: "active",
+      });
+      dashboard.totalRequests = requests.length;
+      // get total students from accepted projects
+      let totalStudents = 0;
+      for (let i = 0; i < acceptedProjects.length; i++) {
+        totalStudents += acceptedProjects[i].students.length;
+      }
+      dashboard.totalStudents = totalStudents;
     }
-    dashboard.totalStudents = totalStudents;
     res.status(200).json(dashboard);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server Error");
+    res.status(500).send("Server Error: ---> " + err.message);
   }
 });
 
@@ -207,11 +235,21 @@ router.get("/groups", auth, async (req, res) => {
     if (!faculty) {
       return res.status(404).json({ msg: "Faculty not found" });
     }
-    let groups = await Project.find({
-      faculty: req.user._id,
-      isApproved: true,
-      status: "active",
-    });
+    let groups = [];
+    if (req.headers.semester) {
+      groups = await Project.find({
+        faculty: req.user._id,
+        isApproved: true,
+        status: "active",
+        semester: req.headers.semester,
+      });
+    } else {
+      groups = await Project.find({
+        faculty: req.user._id,
+        isApproved: true,
+        status: "active",
+      });
+    }
     const groupsData = [];
     for (let i = 0; i < groups.length; i++) {
       let group = groups[i].toObject();
@@ -259,10 +297,9 @@ router.get("/groups", auth, async (req, res) => {
     res.status(200).json(groupsjson);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server Error");
+    res.status(500).send("Server Error: ---> " + err.message);
   }
 });
-
 
 // @route   DELETE api/faculty/removeStudentFromGroup/:id/:studentId
 // @desc    Remove student from group
@@ -287,6 +324,14 @@ router.delete(
       if (!project) {
         return res.status(404).json({ msg: "Project not found" });
       }
+      // check if faculty is owner of project
+      if (project.faculty.toString() !== req.user._id) {
+        return res.status(401).json({ msg: "Not authorized" });
+      }
+      //check if student is leader
+      if (project.leader.toString() === studentId) {
+        return res.status(404).json({ msg: "Student is leader" });
+      }
       //check if student is in group
       const studentIndex = project.students.indexOf(studentId);
       if (studentIndex === -1) {
@@ -303,5 +348,47 @@ router.delete(
     }
   }
 );
+
+//@route GET api/faculty/board/:project_id
+//@desc Get Board of a project
+//@access Private
+router.get("/board/:project_id", auth, async (req, res) => {
+  try {
+    // if role is not faculty then return error
+    if (req.user.role !== "faculty") {
+      return res.status(401).json({ msg: "Not authorized" });
+    }
+    // get project id from params
+    const { project_id } = req.params;
+    //find project
+    const project = await Project.findById(project_id);
+    if (!project) {
+      return res.status(404).json({ msg: "Project not found" });
+    }
+    // check if faculty is owner of project
+    if (project.faculty.toString() !== req.user._id) {
+      return res.status(401).json({ msg: "Not authorized" });
+    }
+    //get board
+    const board = await Board.findOne({ project: project._id })
+      .populate({
+        path: "lists",
+        select: "name cards",
+        model: "List",
+        populate: {
+          path: "cards",
+          model: "Card",
+        },
+      })
+      .exec();
+    if (!board) {
+      return res.status(404).json({ msg: "Board not found" });
+    }
+    res.status(200).json(board);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
 
 module.exports = router;

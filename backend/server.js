@@ -38,6 +38,9 @@ app.use("/api/projects", require("./routes/projectRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/faculty", require("./routes/facultyRoutes"));
 app.use("/api/student", require("./routes/studentRoutes"));
+app.use("/api/board", require("./routes/boardRoutes"));
+app.use("/api/list", require("./routes/listRoutes"));
+app.use("/api/card", require("./routes/cardRoutes"));
 
 //hello world for testing
 app.get("/", (req, res) => {
