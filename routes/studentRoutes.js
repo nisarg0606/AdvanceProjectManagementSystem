@@ -73,7 +73,6 @@ router.get("/dashboard", auth, async (req, res) => {
       groupMembers,
       totalMembers,
     });
-    res.status(200).json(result);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error --> " + err.message);
