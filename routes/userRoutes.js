@@ -85,6 +85,12 @@ router.post("/login", async (req, res) => {
     //set token in header
     // if student then show project id also
     if (user.role == "student") {
+      if(user.project_id == null){
+        user.rejected = false;
+        user.projectId = null;
+        return res.header("x-auth-token", token).status(200).json(user);
+      }
+      else{
       const project = await Project.findOne(user.project_id);
       user.projectId = project._id;
       if (project.isApproved || project.status == "rejected") {
@@ -95,9 +101,11 @@ router.post("/login", async (req, res) => {
       }else{
         user.rejected = false;
       }
+      return res.header("x-auth-token", token).status(200).json(user);
     }
-    res.header("x-auth-token", token);
-    res.status(200).json(user);
+  }
+    // res.header("x-auth-token", token);
+    // res.status(200).json(user);
   } catch (e) {
     res.status(400).send("Error in Logging in" + e.message);
   }
