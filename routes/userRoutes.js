@@ -86,7 +86,7 @@ router.post("/login", async (req, res) => {
     // if student then show project id also
     if (user.role == "student") {
       if(user.project_id == null){
-        user.rejected = false;
+        user.rejected = "no";
         user.projectId = null;
         return res.header("x-auth-token", token).status(200).json(user);
       }
@@ -94,12 +94,12 @@ router.post("/login", async (req, res) => {
       const project = await Project.findOne(user.project_id);
       user.projectId = project._id;
       if (project.isApproved || project.status == "rejected") {
-        user.rejected = true;
+        user.rejected = "yes";
         const comments = project.comments;
         const latestComment = comments[comments.length - 1];
         user.comment = latestComment.text;
       }else{
-        user.rejected = false;
+        user.rejected = "no";
       }
       return res.header("x-auth-token", token).status(200).json(user);
     }
