@@ -26,7 +26,7 @@ router.get("/dashboard", auth, async (req, res) => {
       const comments = project.comments;
       const message =
         "Please delete this project by clicking the delete button here and create a new one";
-      return res.status(200).json({ msg: message, comment: comments });
+      return res.status(200).json({ msg: message, comment: comments, rejected: true, project_id: project._id });
     }
     // get leader name and email
     const leader = await Student.findOne({ _id: leaderId }).select(
@@ -72,6 +72,7 @@ router.get("/dashboard", auth, async (req, res) => {
       leaderEmail,
       groupMembers,
       totalMembers,
+      rejected: false,
     });
   } catch (err) {
     console.error(err.message);
