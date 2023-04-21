@@ -51,7 +51,7 @@ router.post("/login", async (req, res) => {
           });
         }
         // console.log("faculty found");
-        console.log(user);
+        // console.log(user);
       } else {
         user = await Admin.findOne({ email });
         if (user) {
@@ -103,9 +103,9 @@ router.post("/login", async (req, res) => {
       }
       return res.header("x-auth-token", token).status(200).json(user);
     }
+  }else{
+    return res.header("x-auth-token", token).status(200).json(user);
   }
-    // res.header("x-auth-token", token);
-    // res.status(200).json(user);
   } catch (e) {
     res.status(400).send("Error in Logging in" + e.message);
   }
