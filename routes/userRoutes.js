@@ -83,6 +83,19 @@ router.post("/login", async (req, res) => {
     //remove password from user data
     delete user.password;
     //set token in header
+    // if student then show project id also
+    if (user.role == "student") {
+      const project = await Project.findOne(user.project_id);
+      user.projectId = project._id;
+      if (project.isApproved || project.status == "rejected") {
+        user.rejected = true;
+        const comments = project.comments;
+        const latestComment = comments[comments.length - 1];
+        user.comment = latestComment.text;
+      }else{
+        user.rejected = false;
+      }
+    }
     res.header("x-auth-token", token);
     res.status(200).json(user);
   } catch (e) {
