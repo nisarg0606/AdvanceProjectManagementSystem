@@ -113,11 +113,11 @@ const ProjectSchema = new mongoose.Schema({
   },
   company: {
     type: String,
-    // default: "vsitr",
+    // default: "LDRP-ITR",
   },
   company_email: {
     type: String,
-    // default: "vsitr@gmail.com",
+    // default: "LDRP-ITR@gmail.com",
   },
   frontendTechnologies: {
     type: String,
