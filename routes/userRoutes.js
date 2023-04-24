@@ -93,7 +93,7 @@ router.post("/login", async (req, res) => {
       else{
       const project = await Project.findOne(user.project_id);
       user.projectId = project._id;
-      if (project.isApproved || project.status == "rejected") {
+      if (project.isApproved == false || project.status == "rejected") {
         user.rejected = "yes";
         const comments = project.comments;
         const latestComment = comments[comments.length - 1];
